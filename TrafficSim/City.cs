@@ -1,7 +1,6 @@
 ﻿
 using System;
 using System.Collections.Generic;
-using Newtonsoft.Json.Serialization;
 using TrafficSim_API.SimSrc.Roads;
 
 namespace TrafficSim_API.SimSrc
@@ -9,10 +8,10 @@ namespace TrafficSim_API.SimSrc
     public class City
     {
         private readonly ZoneMap _zoning;
-        private ushort _budget;
+        private ulong _budget;
         private readonly byte _cityHeight;
         private readonly byte _cityWidth;
-        private readonly uint _population;
+        private readonly ulong _population;
         private readonly ulong _traffictCycleTime;
         private readonly Random _rand = new Random();
         public static ITile [,] LiveMap;
@@ -24,7 +23,7 @@ namespace TrafficSim_API.SimSrc
         
         
 
-         City(StartingValues startValues)
+         public City(StartingValues startValues)
         {
             
             _budget = startValues.Budget;
@@ -72,7 +71,7 @@ namespace TrafficSim_API.SimSrc
                             break;
                             //Road
                         case 2:
-                            LiveMap[x,y] = new TwoLaneRoad();
+                            LiveMap[x,y] = new TwoLaneRoad(new Point(x, y));
                             break;
                             //Intersection
                         case 3:
@@ -139,7 +138,7 @@ namespace TrafficSim_API.SimSrc
 
         private void GeneratePeople()
         {
-            for (var i = 0; i < _population; i++)
+            for (ulong i = 0; i < _population; i++)
             {
                 var isNightShift = _rand.Next(101) < 10;
                 var scheduleShift = _rand.Next(-2,3);

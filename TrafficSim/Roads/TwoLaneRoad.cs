@@ -12,7 +12,7 @@ namespace TrafficSim_API.SimSrc.Roads
         public ushort DirectionAOccupancy { get; set; }
         public ushort DirectionBOccupancy { get; set; }
 
-        TwoLaneRoad(Point location) 
+        public TwoLaneRoad(Point location) 
         {
             NumberOfLanes = 2;
             SpeedLimit = 25;

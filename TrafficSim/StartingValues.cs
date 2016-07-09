@@ -9,8 +9,8 @@ namespace TrafficSim_API.SimSrc
     {
         public byte MapWidth;
         public byte MapHeight;
-        public ushort Budget;
-        public uint Population;
+        public ulong Budget;
+        public ulong Population;
         public ulong TrafficLightCycleTimeDefault;
     }
 }

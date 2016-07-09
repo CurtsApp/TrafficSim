@@ -43,8 +43,28 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="City.cs" />
+    <Compile Include="Direction.cs" />
+    <Compile Include="ITile.cs" />
+    <Compile Include="MutationHandling\TrafficMutator.cs" />
+    <Compile Include="PathPossibilities.cs" />
+    <Compile Include="Person.cs" />
+    <Compile Include="Point.cs" />
+    <Compile Include="StartUp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Roads\FourLaneRoad.cs" />
+    <Compile Include="Roads\Home.cs" />
+    <Compile Include="Roads\Intersection.cs" />
+    <Compile Include="Roads\IRoad.cs" />
+    <Compile Include="Roads\Office.cs" />
+    <Compile Include="Roads\Road.cs" />
+    <Compile Include="Roads\SixLaneRoad.cs" />
+    <Compile Include="Roads\ThreeLaneRoadOneWay.cs" />
+    <Compile Include="Roads\TwoLaneRaodOneWay.cs" />
+    <Compile Include="Roads\TwoLaneRoad.cs" />
+    <Compile Include="StartingValues.cs" />
+    <Compile Include="Zone.cs" />
+    <Compile Include="ZoneMap.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
