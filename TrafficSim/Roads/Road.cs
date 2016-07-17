@@ -31,12 +31,7 @@ namespace TrafficSim_API.SimSrc.Roads
         public int NumberOfLanes { get; set; }
         public int SpeedLimit { get; set; }
 
-        Point IRoad.Location
-        {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
-        }
-
+        
         public Point Start { get; set; }
         public Point End { get; set; }
         public double Cost { get; set; }
@@ -45,6 +40,7 @@ namespace TrafficSim_API.SimSrc.Roads
         public ushort DirectionAOccupancy { get; set; }
         public ushort DirectionBOccupancy { get; set; }
 
-        
+
+        public Point Location { get; set; }
     }
 }

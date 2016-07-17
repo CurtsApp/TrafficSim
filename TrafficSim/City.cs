@@ -35,6 +35,33 @@ namespace TrafficSim_API.SimSrc
             _zoning = GenerateZones(_zoning);
             LiveMap = new ITile[_cityWidth, _cityHeight];
             LiveMap = GenerateLiveMap(LiveMap);
+            for (byte y = 0; y < _cityHeight;y++)
+            {
+                for (byte x = 0; x < _cityWidth; x++)
+                {
+
+                   
+                    if (LiveMap[x, y] is TwoLaneRoad)
+                    {
+                        Console.Write("  ");
+                    } else if (LiveMap[x,y] is Home)
+                    {
+                        Console.Write("H ");
+                    }
+                    else if (LiveMap[x, y] is Office)
+                    {
+                        Console.Write("O ");
+                    }
+                    else if (LiveMap[x, y] is Intersection)
+                    {
+                        Console.Write("  ");
+                    }
+                    
+
+                }
+                Console.WriteLine();
+             }
+             Console.ReadLine();
         }
 
         public void Tick()
@@ -77,7 +104,7 @@ namespace TrafficSim_API.SimSrc
                         case 3:
                             Intersection bufferIntersection = new Intersection(_traffictCycleTime, TicksSinceStartUp);
                             _intersections.Add(bufferIntersection);
-                            
+                            LiveMap[x, y] = bufferIntersection;
                             break;
                             default:
                             throw new Exception("Zoning Map: Enum exceeds expected values");
@@ -112,14 +139,27 @@ namespace TrafficSim_API.SimSrc
                     }
                     else
                     {
-                        var rng = _rand.Next(101);
-                        var xSquared = x ^ x;
-                        var ySquared = y ^ y;
-                        var maxXSquared = _cityWidth ^ _cityWidth;
-                        var maxYSquared = _cityHeight ^ _cityHeight;
-                        var distanceFromEdge = Math.Sqrt(xSquared + ySquared);
-                        var percentFromEdge = distanceFromEdge/Math.Sqrt(maxXSquared + maxYSquared);
-                        if (rng < percentFromEdge)
+
+                        //If the percent from center is greater than 75% it will always be a house
+                        double rng = _rand.Next(75);
+                        rng = rng/100;
+                        //Calculate maximum distance from center of map
+                        var maxXSquared = _cityWidth/2;
+                        var maxYSquared = _cityHeight/2;
+                        //Calculated current position relative to center of map
+                        var xSquared = x - maxXSquared;
+                        var ySquared = y - maxYSquared;
+                        //Square max value
+                        maxXSquared = maxXSquared * maxXSquared;
+                        maxYSquared = maxYSquared * maxYSquared;
+                        //Square current positon
+                        xSquared = xSquared * xSquared;
+                        ySquared = ySquared * ySquared;
+                        //Calculate percent from center of the map
+                        var distanceFromCenter = Math.Sqrt(xSquared + ySquared);
+                        var percentFromCenter = distanceFromCenter/Math.Sqrt(maxXSquared + maxYSquared);
+                   
+                        if (rng < percentFromCenter)
                         {
                             zones.Map[x, y] = Zone.Residential;
                         }

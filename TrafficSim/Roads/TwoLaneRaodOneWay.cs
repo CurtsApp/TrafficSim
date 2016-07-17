@@ -11,6 +11,8 @@ namespace TrafficSim_API.SimSrc.Roads
         public Point Start { get; set; }
         public Point End { get; set; }
 public double Cost { get; set; }
+        public ushort DirectionAOccupancy { get; set; }
+        public ushort DirectionBOccupancy { get; set; }
 
         TwoLaneRoadOneWay(Point startPoint, Point endPoint) 
         {
@@ -25,6 +27,8 @@ public double Cost { get; set; }
         {
             
         }
+
+        public Point Location { get; set; }
     }
 
    

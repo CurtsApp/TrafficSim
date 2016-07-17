@@ -32,10 +32,10 @@ namespace TrafficSim_API.SimSrc
             ulong timeToWork = 0;
             bool isFinsihed = false;
             Point currentPos = Home.Location;
-            while (!isFinsihed)
+            /*while (!isFinsihed)
             {
                 if()
-            }
+            }*/
         }
 
         public void Update()
