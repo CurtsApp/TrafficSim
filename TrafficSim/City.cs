@@ -61,7 +61,9 @@ namespace TrafficSim_API.SimSrc
                 }
                 Console.WriteLine();
              }
-             Console.ReadLine();
+             //Console.ReadLine();
+            GeneratePeople();
+             
         }
 
         public void Tick()
@@ -159,7 +161,7 @@ namespace TrafficSim_API.SimSrc
                         var distanceFromCenter = Math.Sqrt(xSquared + ySquared);
                         var percentFromCenter = distanceFromCenter/Math.Sqrt(maxXSquared + maxYSquared);
                    
-                        if (rng < percentFromCenter)
+                        if (.5 < percentFromCenter)
                         {
                             zones.Map[x, y] = Zone.Residential;
                         }
@@ -180,10 +182,12 @@ namespace TrafficSim_API.SimSrc
         {
             for (ulong i = 0; i < _population; i++)
             {
-                var isNightShift = _rand.Next(101) < 10;
+                //Nightshift is being removed for early stages, it may or may not be implmented in final.
+                var isNightShift = false; //= _rand.Next(101) < 10;
                 var scheduleShift = _rand.Next(-2,3);
                 int startTime;
 
+                //Nightshift is not implemented at this time.
                 if (isNightShift)
                 {
                     startTime = 22 + scheduleShift;

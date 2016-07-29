@@ -27,15 +27,38 @@ namespace TrafficSim_API.SimSrc
             CalculatePathToWork();
         }
 
-        public void CalculatePathToWork()
+        public void CalculatePathToWork() { 
+
+            
+            PathPossibilities pathStart = new PathPossibilities(Home.Location);
+            PathToWork = GetPath(pathStart);
+
+
+        }
+        /*
+         * Path Planning
+         * 
+         * 
+         * 
+         * 
+         * 
+         * 
+         * 
+         */
+        private List<Direction> GetPath(PathPossibilities possibleMoves)
         {
-            ulong timeToWork = 0;
-            bool isFinsihed = false;
-            Point currentPos = Home.Location;
-            /*while (!isFinsihed)
+            
+
+            for (int x = -1; x < 2; x++)
             {
-                if()
-            }*/
+                for (int y = -1; y < 2; y++)
+                {
+                    if ()
+                    {
+                        
+                    }
+                }
+            }
         }
 
         public void Update()
