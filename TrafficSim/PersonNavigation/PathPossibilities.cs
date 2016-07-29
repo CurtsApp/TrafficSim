@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TrafficSim.PersonNavigation;
+using TrafficSim_API.SimSrc;
 
-namespace TrafficSim_API.SimSrc
+namespace TrafficSim.PersonNavigation
 {
     public class PathPossibilities
     {

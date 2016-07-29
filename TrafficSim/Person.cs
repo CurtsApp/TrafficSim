@@ -1,8 +1,10 @@
 ﻿
 using System.Collections.Generic;
-using TrafficSim_API.SimSrc.Roads;
+using TrafficSim.PersonNavigation;
+using TrafficSim.Roads;
 
-namespace TrafficSim_API.SimSrc
+
+namespace TrafficSim
 {
     public class Person
     {
@@ -38,8 +40,8 @@ namespace TrafficSim_API.SimSrc
         /*
          * Path Planning
          * 
-         * 
-         * 
+         * Find all exits
+         * Find all options from each exit
          * 
          * 
          * 

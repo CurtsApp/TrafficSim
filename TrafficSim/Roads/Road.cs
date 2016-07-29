@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TrafficSim_API.SimSrc;
+using TrafficSim_API.SimSrc.Roads;
 
-namespace TrafficSim_API.SimSrc.Roads
+namespace TrafficSim.Roads
 {
     public abstract class Road : IRoad
     {

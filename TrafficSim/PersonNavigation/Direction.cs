@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace TrafficSim.PersonNavigation
 {
-    enum Direction
+    public enum Direction
     {
         North,South,East,West
     }

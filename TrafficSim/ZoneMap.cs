@@ -1,7 +1,7 @@
 ﻿
-using System.Collections.Generic;
 
-namespace TrafficSim_API.SimSrc
+
+namespace TrafficSim
 {
     public class ZoneMap
     {

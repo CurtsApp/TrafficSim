@@ -1,7 +1,7 @@
 ﻿
 using System;
 
-namespace TrafficSim_API.SimSrc.Roads
+namespace TrafficSim.Roads
 {
     public class FourLaneRoad : Road
     {

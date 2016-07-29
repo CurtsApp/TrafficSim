@@ -1,5 +1,5 @@
 ﻿
-namespace TrafficSim_API.SimSrc
+namespace TrafficSim
 {
     public class Point
     {

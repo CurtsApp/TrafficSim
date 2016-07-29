@@ -1,7 +1,9 @@
 ﻿
 using System;
+using TrafficSim_API.SimSrc;
+using TrafficSim_API.SimSrc.Roads;
 
-namespace TrafficSim_API.SimSrc.Roads
+namespace TrafficSim.Roads
 {
     public class SixLaneRoad : IRoad
     {

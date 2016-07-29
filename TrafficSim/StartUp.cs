@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TrafficSim_API.SimSrc;
-
-namespace TrafficSim
+﻿namespace TrafficSim
 {
     class StartUp
     {
