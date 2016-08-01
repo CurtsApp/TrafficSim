@@ -117,13 +117,31 @@ namespace TrafficSim
                 Console.Write(e);
             }
 
-            foreach (var PATH in allPathPossiblity)
+            for (int i = 0; i < allPathPossiblity.Count; i++)
             {
-                var currentPos = new Point(Home.Location.GetX(), Home.Location.GetY());
-                //Find where we are at along the pathh
-                foreach (var direction in PATH.Directions)
                 {
-                    switch (direction)
+                    var currentPos = new Point(Home.Location.GetX(), Home.Location.GetY());
+                    //Find where we are at along the pathh
+                    foreach (var direction in allPathPossiblity[i].Directions)
+                    {
+                        switch (direction)
+                        {
+                            case Direction.East:
+                                currentPos.SetX(currentPos.GetX() + 1);
+                                break;
+                            case Direction.North:
+
+                                currentPos.SetY(currentPos.GetY() + 1);
+                                break;
+                            case Direction.South:
+                                currentPos.SetY(currentPos.GetY() - 1);
+                                break;
+                            case Direction.West:
+                                currentPos.SetX(currentPos.GetX() - 1);
+                                break;
+                        }
+                    }
+                    switch (allPathPossiblity[i].NextDirection)
                     {
                         case Direction.East:
                             currentPos.SetX(currentPos.GetX() + 1);
@@ -139,133 +157,117 @@ namespace TrafficSim
                             currentPos.SetX(currentPos.GetX() - 1);
                             break;
                     }
-                }
-                switch (PATH.NextDirection)
-                {
-                    case Direction.East:
-                        currentPos.SetX(currentPos.GetX() + 1);
-                        break;
-                    case Direction.North:
+                    //After position calculation add the NextDirection to List<Directions> for future copying
+                    allPathPossiblity[i].Directions.Add(allPathPossiblity[i].NextDirection);
 
-                        currentPos.SetY(currentPos.GetY() + 1);
-                        break;
-                    case Direction.South:
-                        currentPos.SetY(currentPos.GetY() - 1);
-                        break;
-                    case Direction.West:
-                        currentPos.SetX(currentPos.GetX() - 1);
-                        break;
-                }
-                //After position calculation add the NextDirection to List<Directions> for future copying
-                PATH.Directions.Add(PATH.NextDirection);
-
-                //See if the path has arrived at the office
-                if (currentPos.GetX() + 1 == Work.Location.GetX() && currentPos.GetY() == Work.Location.GetY())
-                {
-                    PATH.Directions.Add(Direction.East);
-                }
-                else if (currentPos.GetX() - 1 == Work.Location.GetX() && currentPos.GetY() == Work.Location.GetY())
-                {
-                    PATH.Directions.Add(Direction.West);
-                }
-                else if (currentPos.GetX() == Work.Location.GetX() && currentPos.GetY() == Work.Location.GetY() + 1)
-                {
-                    PATH.Directions.Add(Direction.North);
-                }
-                else if (currentPos.GetX() == Work.Location.GetX() && currentPos.GetY() == Work.Location.GetY() - 1)
-                {
-                    PATH.Directions.Add(Direction.South);
-                }
-                //If the office hasn't been found add another round of possiblies
-                else
-                {
-                    //Means you are currently on top of an intersection
-                    if (PathingHelper[currentPos.GetX(), currentPos.GetY()] < 0)
+                    //See if the path has arrived at the office
+                    if (currentPos.GetX() + 1 == Work.Location.GetX() && currentPos.GetY() == Work.Location.GetY())
                     {
-                        //No Uturns
-                        //Scrubbing Out of index
-                        if (currentPos.GetX() != PathingHelper.GetLength(0) - 1)
-                        {
-                            if (PathingHelper[currentPos.GetX() + 1, currentPos.GetY()] > 0 &&
-                                PATH.NextDirection != Direction.South)
-                            {
-                                var buffer = new Point(currentPos.GetX() + 1, currentPos.GetY());
-                                if (!CheckForBackTrack(buffer, PATH.Directions, Home.Location))
-                                {
-                                    var newPossiblity = new PathPossiblity();
-                                    //Copy the list by value
-                                    foreach (var direction in PATH.Directions)
-                                    {
-                                        newPossiblity.Directions.Add(direction);
-                                    }
-                                    newPossiblity.NextDirection = Direction.East;
-                                    allPathPossiblity.Add(newPossiblity);
-                                }
-                            }
-                        }
-                        //Scrubbing for out of index
-                        if (currentPos.GetX() != 0)
-                        {
-                            if (PathingHelper[currentPos.GetX() - 1, currentPos.GetY()] > 0 &&
-                                PATH.NextDirection != Direction.North)
-                            {
-                                var buffer = new Point(currentPos.GetX() - 1, currentPos.GetY());
-                                if (!CheckForBackTrack(buffer, PATH.Directions, Home.Location))
-                                {
-                                    var newPossiblity = new PathPossiblity();
-                                    //Copy the list by value
-                                    foreach (var direction in PATH.Directions)
-                                    {
-                                        newPossiblity.Directions.Add(direction);
-                                    }
-                                    newPossiblity.NextDirection = Direction.West;
-                                    allPathPossiblity.Add(newPossiblity);
-                                }
-                            }
-                        }
-                        if (currentPos.GetY() != PathingHelper.GetLength(1) - 1)
-                        {
-                            if (PathingHelper[currentPos.GetX(), currentPos.GetY() + 1] > 0 &&
-                                PATH.NextDirection != Direction.West)
-                            {
-                                var buffer = new Point(currentPos.GetX(), currentPos.GetY() + 1);
-                                if (!CheckForBackTrack(buffer, PATH.Directions, Home.Location))
-                                {
-                                    var newPossiblity = new PathPossiblity();
-                                    //Copy the list by value
-                                    foreach (var direction in PATH.Directions)
-                                    {
-                                        newPossiblity.Directions.Add(direction);
-                                    }
-                                    newPossiblity.NextDirection = Direction.North;
-                                    allPathPossiblity.Add(newPossiblity);
-                                }
-                            }
-                        }
-                        if (currentPos.GetY() != 0)
-                        {
-                            if (PathingHelper[currentPos.GetX(), currentPos.GetY() - 1] > 0 &&
-                                PATH.NextDirection != Direction.East)
-                            {
-                                var buffer = new Point(currentPos.GetX(), currentPos.GetY() - 1);
-                                if (!CheckForBackTrack(buffer, PATH.Directions, Home.Location))
-                                {
-                                    var newPossiblity = new PathPossiblity();
-                                    //Copy the list by value
-                                    foreach (var direction in PATH.Directions)
-                                    {
-                                        newPossiblity.Directions.Add(direction);
-                                    }
-                                    newPossiblity.NextDirection = Direction.South;
-                                    allPathPossiblity.Add(newPossiblity);
-                                }
-                            }
-                        }
-                        
-                        
-                        
+                        allPathPossiblity[i].Directions.Add(Direction.East);
                     }
-                    
+                    else if (currentPos.GetX() - 1 == Work.Location.GetX() && currentPos.GetY() == Work.Location.GetY())
+                    {
+                        allPathPossiblity[i].Directions.Add(Direction.West);
+                    }
+                    else if (currentPos.GetX() == Work.Location.GetX() && currentPos.GetY() == Work.Location.GetY() + 1)
+                    {
+                        allPathPossiblity[i].Directions.Add(Direction.North);
+                    }
+                    else if (currentPos.GetX() == Work.Location.GetX() && currentPos.GetY() == Work.Location.GetY() - 1)
+                    {
+                        allPathPossiblity[i].Directions.Add(Direction.South);
+                    }
+                    //If the office hasn't been found add another round of possiblies
+                    else
+                    {
+                        //Means you are currently on top of an intersection
+                        if (PathingHelper[currentPos.GetX(), currentPos.GetY()] < 0)
+                        {
+                            //No Uturns
+                            //Scrubbing Out of index
+                            if (currentPos.GetX() != PathingHelper.GetLength(0) - 1)
+                            {
+                                if (PathingHelper[currentPos.GetX() + 1, currentPos.GetY()] > 0 &&
+                                    allPathPossiblity[i].NextDirection != Direction.South)
+                                {
+                                    var buffer = new Point(currentPos.GetX() + 1, currentPos.GetY());
+                                    if (!CheckForBackTrack(buffer, allPathPossiblity[i].Directions, Home.Location))
+                                    {
+                                        var newPossiblity = new PathPossiblity();
+                                        //Copy the list by value
+                                        foreach (var direction in allPathPossiblity[i].Directions)
+                                        {
+                                            newPossiblity.Directions.Add(direction);
+                                        }
+                                        newPossiblity.NextDirection = Direction.East;
+                                        allPathPossiblity.Add(newPossiblity);
+                                    }
+                                }
+                            }
+                            //Scrubbing for out of index
+                            if (currentPos.GetX() != 0)
+                            {
+                                if (PathingHelper[currentPos.GetX() - 1, currentPos.GetY()] > 0 &&
+                                    allPathPossiblity[i].NextDirection != Direction.North)
+                                {
+                                    var buffer = new Point(currentPos.GetX() - 1, currentPos.GetY());
+                                    if (!CheckForBackTrack(buffer, allPathPossiblity[i].Directions, Home.Location))
+                                    {
+                                        var newPossiblity = new PathPossiblity();
+                                        //Copy the list by value
+                                        foreach (var direction in allPathPossiblity[i].Directions)
+                                        {
+                                            newPossiblity.Directions.Add(direction);
+                                        }
+                                        newPossiblity.NextDirection = Direction.West;
+                                        allPathPossiblity.Add(newPossiblity);
+                                    }
+                                }
+                            }
+                            if (currentPos.GetY() != PathingHelper.GetLength(1) - 1)
+                            {
+                                if (PathingHelper[currentPos.GetX(), currentPos.GetY() + 1] > 0 &&
+                                    allPathPossiblity[i].NextDirection != Direction.West)
+                                {
+                                    var buffer = new Point(currentPos.GetX(), currentPos.GetY() + 1);
+                                    if (!CheckForBackTrack(buffer, allPathPossiblity[i].Directions, Home.Location))
+                                    {
+                                        var newPossiblity = new PathPossiblity();
+                                        //Copy the list by value
+                                        foreach (var direction in allPathPossiblity[i].Directions)
+                                        {
+                                            newPossiblity.Directions.Add(direction);
+                                        }
+                                        newPossiblity.NextDirection = Direction.North;
+                                        allPathPossiblity.Add(newPossiblity);
+                                    }
+                                }
+                            }
+                            if (currentPos.GetY() != 0)
+                            {
+                                if (PathingHelper[currentPos.GetX(), currentPos.GetY() - 1] > 0 &&
+                                    allPathPossiblity[i].NextDirection != Direction.East)
+                                {
+                                    var buffer = new Point(currentPos.GetX(), currentPos.GetY() - 1);
+                                    if (!CheckForBackTrack(buffer, allPathPossiblity[i].Directions, Home.Location))
+                                    {
+                                        var newPossiblity = new PathPossiblity();
+                                        //Copy the list by value
+                                        foreach (var direction in allPathPossiblity[i].Directions)
+                                        {
+                                            newPossiblity.Directions.Add(direction);
+                                        }
+                                        newPossiblity.NextDirection = Direction.South;
+                                        allPathPossiblity.Add(newPossiblity);
+                                    }
+                                }
+                            }
+
+
+
+                        }
+
+                    }
                 }
             }
         }
