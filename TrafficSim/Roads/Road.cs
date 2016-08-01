@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using TrafficSim_API.SimSrc;
-using TrafficSim_API.SimSrc.Roads;
+﻿
+
+using System;
 
 namespace TrafficSim.Roads
 {
@@ -31,7 +28,7 @@ namespace TrafficSim.Roads
         
         private const ushort OccupancyPerLane = 4;
         public int NumberOfLanes { get; set; }
-        public int SpeedLimit { get; set; }
+        public float TimeToTraverse { get; set; }
 
         
         public Point Start { get; set; }
@@ -44,5 +41,7 @@ namespace TrafficSim.Roads
 
 
         public Point Location { get; set; }
+
+       
     }
 }

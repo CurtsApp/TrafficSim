@@ -1,6 +1,4 @@
 ﻿
-using System;
-
 namespace TrafficSim.Roads
 {
     public class FourLaneRoad : Road
@@ -10,7 +8,7 @@ namespace TrafficSim.Roads
         public FourLaneRoad(Point startPoint, Point endPoint) 
         {
             NumberOfLanes = 4;
-            SpeedLimit = 45;
+            TimeToTraverse = 35;
             Start = startPoint;
             End = endPoint;
             Cost = 5;

@@ -1,25 +1,37 @@
 ﻿
+using System.Runtime.CompilerServices;
+
 namespace TrafficSim
 {
     public class Point
     {
-        private byte X { get; set; }
-        private byte Y { get; set; }
+        private int X { get; set; }
+        private int Y { get; set; }
 
-        public Point(byte _x, byte _y)
+        public Point(int _x, int _y)
         {
             X = _x;
             Y = _y;
         }
         
-        public byte GetX()
+        public int GetX()
         {
             return X;
         }
 
-        public byte GetY()
+        public int GetY()
         {
             return Y;
+        }
+
+        public void SetX(int newX)
+        {
+            X = newX;
+        }
+
+        public void SetY(int newY)
+        {
+            Y = newY;
         }
     }
 }

@@ -1,0 +1,76 @@
+The goal of this simulator is to find the most effective traffic light patterns and speed limits in a world with real people with real schedules and jobs for an average bussiness day.
+
+For the purpose of realism all roads will be given an cost based on number of lanes. Freeways are an additional cost. The simulation will take the budget given and build the most opptimised city to fit that budget. The exact balance of all the roadays relative to each other will take research.
+
+Any citizen living in any part of the city should be able to work any job.
+
+Core Elements
+
+-Individual People
+	Everyone is unique. Each person ahs their own scheduel their own time frame. 
+	Main Feilds
+		Address
+		Work Place
+		Schedule (8am-5pm) who knows?
+
+-Realistic Roadways
+	Cars can not clip through each other
+	In this utopia everyone drives the speelimit
+	The speedlimit for every road way will is as follows 
+		2 lane residential, 25 mph 3$
+		2 lane one way, 40 mph (cheap road) 3$
+		3 lane one way, 50 mph (cheap road) 4$
+		4 lane, 45 mph 5$
+		6 lane, 50 mph 7$
+		freeway 8 lanes, 75 mph 9$
+		
+	Main Feilds
+		Number of Lanes
+		
+-The Freeway
+	The freeway is a must have in this world of real people. One does not simply get to work on residential roads. The generation of the freeway will be the most difficult part of this experiment
+	Main Feilds
+		Start Points
+		End Points
+		Every other bend in the road
+		Branches
+		
+		Number of Lanes
+-City Generation
+	The city will be generated on the basis of a few perameters.
+	The majority of jobs are near the center (down town) but jobs are still spread accross the city
+	It will be in a grid structure
+	
+Addtional Notes
+
+Types of Intersections
+
+4 way light
+3 way light
+4 way stop
+3 way stop
+freeway merge (Queue until gap then join at speed)
+freeway exit (immediate)
+
+Expansive Elements
+
+Weekly schedule
+Non working people, children going to school & day care
+Special Events, holidays & sports
+Intercity travel/tourism
+Uneven city, not a perfect grid.
+Lunch Break
+Driver Error
+
+
+*Alternate Idea
+Generate a city using only subways, buses, and sidewalks opposed to residential streets and freeways.
+
+
+
+
+
+TO:DO;
+1. Road Costs (Relative)
+2. PHX popluation densities
+3. PHX job densities

@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using TrafficSim.Roads;
 
 
 namespace TrafficSim
@@ -9,8 +10,8 @@ namespace TrafficSim
     {
         private readonly ZoneMap _zoning;
         private ulong _budget;
-        private readonly byte _cityHeight;
-        private readonly byte _cityWidth;
+        private readonly int _cityHeight;
+        private readonly int _cityWidth;
         private readonly ulong _population;
         private readonly ulong _traffictCycleTime;
         private readonly Random _rand = new Random();
@@ -20,6 +21,7 @@ namespace TrafficSim
         private List<Office> _offices = new List<Office>();
         private List<Intersection> _intersections = new List<Intersection>();
         public ulong TicksSinceStartUp { get; set; }
+        public float [,] TravelTimes { get; set; }
         
         
 
@@ -35,6 +37,8 @@ namespace TrafficSim
             _zoning = GenerateZones(_zoning);
             LiveMap = new ITile[_cityWidth, _cityHeight];
             LiveMap = GenerateLiveMap(LiveMap);
+            TravelTimes = new float[_cityWidth, _cityHeight];
+            GenerateTravelTimeHelper();
             for (byte y = 0; y < _cityHeight;y++)
             {
                 for (byte x = 0; x < _cityWidth; x++)
@@ -76,6 +80,25 @@ namespace TrafficSim
 
         }
 
+        private void GenerateTravelTimeHelper()
+        {
+            
+            for (var x = 0; x < LiveMap.GetLength(0); x++)
+            {
+                for (var y = 0; y < LiveMap.GetLength(1); y++)
+                {
+                    if (LiveMap[x, y] is IRoad)
+                    {
+                        IRoad buffer = (IRoad) LiveMap[x, y];
+                        TravelTimes[x, y] = buffer.TimeToTraverse;
+                    } else if (LiveMap[x, y] is Intersection)
+                    {
+                        TravelTimes[x, y] = -1.0f;
+                    }
+                   
+                }   
+            }
+        }
         private ITile[,] GenerateLiveMap(ITile[,] liveMap)
         {
             for (byte x = 0; x < _cityWidth; x++)
@@ -202,7 +225,7 @@ namespace TrafficSim
                     endTime = endTime - 24;
                 }
                 var personBuffer = new Person(_homes[_rand.Next(_homes.Count)], _offices[_rand.Next(_offices.Count)],
-                    (byte) startTime, (byte) endTime, LiveMap);
+                    (byte) startTime, (byte) endTime, LiveMap, TravelTimes);
                 _people.Add(personBuffer);
 
             }

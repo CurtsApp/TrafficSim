@@ -44,11 +44,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="City.cs" />
-    <Compile Include="Direction.cs" />
     <Compile Include="ITile.cs" />
     <Compile Include="MutationHandling\TrafficMutator.cs" />
     <Compile Include="PersonNavigation\Direction.cs" />
-    <Compile Include="PersonNavigation\PathPossibilities.cs" />
+    <Compile Include="PersonNavigation\PathPossiblity.cs" />
     <Compile Include="Person.cs" />
     <Compile Include="Point.cs" />
     <Compile Include="StartUp.cs" />

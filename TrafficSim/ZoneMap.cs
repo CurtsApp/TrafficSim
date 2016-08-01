@@ -7,7 +7,7 @@ namespace TrafficSim
     {
         public Zone [,] Map;
 
-        public ZoneMap(byte widthByte, byte heightByte)
+        public ZoneMap(int widthByte, int heightByte)
         {
             Map = new Zone[widthByte, heightByte];
         }
