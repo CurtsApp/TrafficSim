@@ -39,6 +39,7 @@ namespace TrafficSim
 
             var allPathPossiblity = new List<PathPossiblity>();
             var bestCantidate = 0;
+            var bestIndex = 0;
             //Avoiding reference error
             var currentLocation = new Point(Home.Location.GetX(), Home.Location.GetY());
 
@@ -269,6 +270,46 @@ namespace TrafficSim
 
                     }
                 }
+            }
+            int counter = 0;
+            //Find best path
+            foreach (var PATH in allPathPossiblity)
+            {
+                float currentCantidate = 0;
+                Point currentPos = new Point(Home.Location.GetX(),Home.Location.GetY());
+                foreach (var direction in PATH.Directions)
+                {
+                    
+                        switch (direction)
+                        {
+                            case Direction.East:
+                                currentPos.SetX(currentPos.GetX() + 1);
+                                break;
+                            case Direction.North:
+
+                                currentPos.SetY(currentPos.GetY() + 1);
+                                break;
+                            case Direction.South:
+                                currentPos.SetY(currentPos.GetY() - 1);
+                                break;
+                            case Direction.West:
+                                currentPos.SetX(currentPos.GetX() - 1);
+                                break;
+                        }
+                    currentCantidate = currentCantidate + PathingHelper[currentPos.GetX(), currentPos.GetY()];
+                    
+                }
+                if (currentCantidate < bestCantidate)
+                {
+                    currentCantidate = bestCantidate;
+                    bestIndex = counter;
+                }
+                counter++;
+
+            }
+            if (allPathPossiblity.Count != 0)
+            {
+                this.PathToWork = allPathPossiblity[bestIndex].Directions;
             }
         }
 
