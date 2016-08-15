@@ -4,6 +4,6 @@ namespace TrafficSim
 {
     public enum Zone
     {
-        Residential, Work, Road, Intersection
+        Residential, Work, Road, Intersection, Vacant
     }
 }

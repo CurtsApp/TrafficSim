@@ -28,7 +28,7 @@ namespace TrafficSim.Roads
         
         private const ushort OccupancyPerLane = 4;
         public int NumberOfLanes { get; set; }
-        public float TimeToTraverse { get; set; }
+        public int TimeToTraverse { get; set; }
 
         
         public Point Start { get; set; }

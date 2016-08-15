@@ -21,7 +21,7 @@ namespace TrafficSim
         private List<Office> _offices = new List<Office>();
         private List<Intersection> _intersections = new List<Intersection>();
         public ulong TicksSinceStartUp { get; set; }
-        public float [,] TravelTimes { get; set; }
+        public int [,] TravelTimes { get; set; }
         
         
 
@@ -37,11 +37,11 @@ namespace TrafficSim
             _zoning = GenerateZones(_zoning);
             LiveMap = new ITile[_cityWidth, _cityHeight];
             LiveMap = GenerateLiveMap(LiveMap);
-            TravelTimes = new float[_cityWidth, _cityHeight];
+            TravelTimes = new int[_cityWidth, _cityHeight];
             GenerateTravelTimeHelper();
-            for (byte y = 0; y < _cityHeight;y++)
+            /*for (int y = 0; y < _cityHeight;y++)
             {
-                for (byte x = 0; x < _cityWidth; x++)
+                for (int x = 0; x < _cityWidth; x++)
                 {
 
                    
@@ -64,7 +64,7 @@ namespace TrafficSim
 
                 }
                 Console.WriteLine();
-             }
+             }*/
              //Console.ReadLine();
             GeneratePeople();
              
@@ -93,7 +93,7 @@ namespace TrafficSim
                         TravelTimes[x, y] = buffer.TimeToTraverse;
                     } else if (LiveMap[x, y] is Intersection)
                     {
-                        TravelTimes[x, y] = -1.0f;
+                        TravelTimes[x, y] = -1;
                     }
                    
                 }   
@@ -131,6 +131,9 @@ namespace TrafficSim
                             _intersections.Add(bufferIntersection);
                             LiveMap[x, y] = bufferIntersection;
                             break;
+                        case 4:
+                            LiveMap[x,y] = new Vacant(new Point(x,y));
+                            break;
                             default:
                             throw new Exception("Zoning Map: Enum exceeds expected values");
                             
@@ -149,6 +152,8 @@ namespace TrafficSim
             {
                 for (int y = 0; y < _cityHeight; y++)
                 {
+                    int shiftedX = x + 2;
+                    int shiftedY = y + 2;
                     if (x%4 == 0|| y%4 == 0)
                     {
 
@@ -161,8 +166,15 @@ namespace TrafficSim
                             zones.Map[x, y] = Zone.Road;
                         }
                         
+                        
+                        
                     }
-                    else
+                    //Leave center of blocks Vacant
+                    else if (shiftedX%4 == 0 && shiftedY%4 == 0)
+                    {
+                        zones.Map[x, y] = Zone.Vacant;
+                    }
+                        else
                     {
 
                         //If the percent from center is greater than 75% it will always be a house
