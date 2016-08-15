@@ -184,7 +184,7 @@ namespace TrafficSim
             //Find best path
             foreach (var path in finishedPathPossibility)
             {
-                float currentCantidate = 0;
+                int currentCantidate = 0;
                 Point currentPos = new Point(Home.Location.GetX(),Home.Location.GetY());
                 foreach (var direction in path.Directions)
                 {
@@ -210,15 +210,15 @@ namespace TrafficSim
                 }
                 if (currentCantidate < bestCantidate)
                 {
-                    currentCantidate = bestCantidate;
+                    bestCantidate = currentCantidate;
                     bestIndex = counter;
                 }
                 counter++;
 
             }
-            if (unfinsihedPathPossiblity.Count != 0)
+            if (finishedPathPossibility.Count != 0)
             {
-                this.PathToWork = unfinsihedPathPossiblity[bestIndex].Directions;
+                this.PathToWork = finishedPathPossibility[bestIndex].Directions;
             }
         }
 
@@ -244,7 +244,7 @@ namespace TrafficSim
                         currentLocation.SetX(currentLocation.GetX() - 1);
                         break;
                 }
-                if (pointToBeChecked.Equals(currentLocation))
+                if (pointToBeChecked.GetX().Equals(currentLocation.GetX()) && pointToBeChecked.GetY().Equals(currentLocation.GetY()))
                 {
                     return true;
                 }
