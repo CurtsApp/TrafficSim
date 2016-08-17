@@ -8,11 +8,12 @@ namespace TrafficSim.PersonNavigation
     {
         public List<Direction> Directions { get; set; }
         public Direction NextDirection { get; set; }
+        public int PathLength { get; set; }
 
         public PathPossiblity()
         {
             Directions = new List<Direction>();
-
+            PathLength = 0;
         }
     }
 }
