@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using TrafficSim.PersonNavigation;
 using TrafficSim.Roads;
 
@@ -15,6 +16,7 @@ namespace TrafficSim
         public byte StartTime { get; set; }
         public byte EndTime { get; set; }
         public PathPossiblity PathToWork { get; set; }
+        public PathPossiblity PathToHome { get; set; }
         private static ITile[,] _map;
         private int[,] PathingHelper { get; }
         public static int PersonTracker = 0;
@@ -31,10 +33,13 @@ namespace TrafficSim
             _map = mapTiles;
 
             PathingHelper = (int[,]) travelTimes.Clone();
-            CalculatePathToWork();
+            //From Home to Work
+            CalculatePath(Home.Location,Work.Location, PathToWork);
+            //From Work to Home
+            CalculatePath(Work.Location,Home.Location, PathToHome);
         }
 
-        private void CalculatePathToWork()
+        private void CalculatePath(Point startPoint, Point endPoint, PathPossiblity pathToDestination)
         {
             for (int y = 0; y < 25; y++)
             {
@@ -89,10 +94,10 @@ namespace TrafficSim
             }
 
             var unfinsihedPathPossiblity = new List<PathPossiblity>();
-            PathPossiblity finishedPathPossibility = new PathPossiblity();
+            
 
             //Avoiding reference error
-            var currentLocation = new Point(Home.Location.GetX(), Home.Location.GetY());
+            var currentLocation = new Point(startPoint.GetX(), endPoint.GetY());
 
             //Left One
             try
@@ -170,10 +175,10 @@ namespace TrafficSim
             }
 
             //Main Path Finding Loop
-
+            
             while (unfinsihedPathPossiblity.Count > 0)
             {
-                StepBranchedSearch(unfinsihedPathPossiblity);
+                StepBranchedSearch(startPoint, endPoint, unfinsihedPathPossiblity, pathToDestination);
                 
             }
             
@@ -211,14 +216,14 @@ namespace TrafficSim
             return false;
         }
 
-        private void StepBranchedSearch(List<PathPossiblity> unfinishedPathPossiblities)
+        private void StepBranchedSearch(Point startPoint, Point endPoint,List<PathPossiblity> unfinishedPathPossiblities, PathPossiblity finishedDirections)
         {
             
             for (var i = 0; i < unfinishedPathPossiblities.Count; i++)
             {
                 
                     
-                    var currentPos = new Point(Home.Location.GetX(), Home.Location.GetY());
+                    var currentPos = new Point(startPoint.GetX(), startPoint.GetY());
                     //Find where we are at along the path
                     foreach (var direction in unfinishedPathPossiblities[i].Directions)
                     {
@@ -269,37 +274,37 @@ namespace TrafficSim
                     unfinishedPathPossiblities[i].Directions.Add(unfinishedPathPossiblities[i].NextDirection);
 
                 //Remove paths longer than the shortest path found
-                if (unfinishedPathPossiblities[i].PathLength > PathToWork?.PathLength)
+                if (unfinishedPathPossiblities[i].PathLength > finishedDirections?.PathLength)
                 {
                     unfinishedPathPossiblities.RemoveAt(i);
                     i--;
                 }
                 //See if the path has arrived at the office
-                    else if (currentPos.GetX() + 1 == Work.Location.GetX() && currentPos.GetY() == Work.Location.GetY())
+                    else if (currentPos.GetX() + 1 == endPoint.GetX() && currentPos.GetY() == endPoint.GetY())
                     {
                         unfinishedPathPossiblities[i].Directions.Add(Direction.East);
-                        PathToWork = unfinishedPathPossiblities[i];
+                        finishedDirections = unfinishedPathPossiblities[i];
                         unfinishedPathPossiblities.RemoveAt(i);
                         i--;
                 }
-                    else if (currentPos.GetX() - 1 == Work.Location.GetX() && currentPos.GetY() == Work.Location.GetY())
+                    else if (currentPos.GetX() - 1 == endPoint.GetX() && currentPos.GetY() == endPoint.GetY())
                     {
                         unfinishedPathPossiblities[i].Directions.Add(Direction.West);
-                    PathToWork = unfinishedPathPossiblities[i];
+                    finishedDirections = unfinishedPathPossiblities[i];
                     unfinishedPathPossiblities.RemoveAt(i);
                         i--;
                 }
-                    else if (currentPos.GetX() == Work.Location.GetX() && currentPos.GetY() == Work.Location.GetY() + 1)
+                    else if (currentPos.GetX() == endPoint.GetX() && currentPos.GetY() == endPoint.GetY() + 1)
                     {
                         unfinishedPathPossiblities[i].Directions.Add(Direction.North);
-                    PathToWork = unfinishedPathPossiblities[i];
+                    finishedDirections = unfinishedPathPossiblities[i];
                     unfinishedPathPossiblities.RemoveAt(i);
                         i--;
                 }
-                    else if (currentPos.GetX() == Work.Location.GetX() && currentPos.GetY() == Work.Location.GetY() - 1)
+                    else if (currentPos.GetX() == endPoint.GetX() && currentPos.GetY() == endPoint.GetY() - 1)
                     {
                         unfinishedPathPossiblities[i].Directions.Add(Direction.South);
-                        PathToWork = unfinishedPathPossiblities[i];
+                    finishedDirections = unfinishedPathPossiblities[i];
                         unfinishedPathPossiblities.RemoveAt(i);
                         i--;
                 }
@@ -323,7 +328,7 @@ namespace TrafficSim
                                     unfinishedPathPossiblities[i].NextDirection != Direction.West) //South
                                 {
                                     var buffer = new Point(currentPos.GetX() + 1, currentPos.GetY());
-                                    if (!CheckForBackTrack(buffer, unfinishedPathPossiblities[i].Directions, Home.Location))
+                                    if (!CheckForBackTrack(buffer, unfinishedPathPossiblities[i].Directions, startPoint))
                                     {
                                         var newPossiblity = new PathPossiblity();
                                         //Copy the list by value
@@ -343,7 +348,7 @@ namespace TrafficSim
                                     unfinishedPathPossiblities[i].NextDirection != Direction.East) //North
                                 {
                                     var buffer = new Point(currentPos.GetX() - 1, currentPos.GetY());
-                                    if (!CheckForBackTrack(buffer, unfinishedPathPossiblities[i].Directions, Home.Location))
+                                    if (!CheckForBackTrack(buffer, unfinishedPathPossiblities[i].Directions, startPoint))
                                     {
                                         var newPossiblity = new PathPossiblity();
                                         //Copy the list by value
@@ -362,7 +367,7 @@ namespace TrafficSim
                                     unfinishedPathPossiblities[i].NextDirection != Direction.South) //West
                                 {
                                     var buffer = new Point(currentPos.GetX(), currentPos.GetY() + 1);
-                                    if (!CheckForBackTrack(buffer, unfinishedPathPossiblities[i].Directions, Home.Location))
+                                    if (!CheckForBackTrack(buffer, unfinishedPathPossiblities[i].Directions, startPoint))
                                     {
                                         var newPossiblity = new PathPossiblity();
                                         //Copy the list by value
@@ -381,7 +386,7 @@ namespace TrafficSim
                                     unfinishedPathPossiblities[i].NextDirection != Direction.North) //East
                                 {
                                     var buffer = new Point(currentPos.GetX(), currentPos.GetY() - 1);
-                                    if (!CheckForBackTrack(buffer, unfinishedPathPossiblities[i].Directions, Home.Location))
+                                    if (!CheckForBackTrack(buffer, unfinishedPathPossiblities[i].Directions, startPoint))
                                     {
                                         var newPossiblity = new PathPossiblity();
                                         //Copy the list by value
