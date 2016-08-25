@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Security.Cryptography.X509Certificates;
 using TrafficSim.PersonNavigation;
 using TrafficSim.Roads;
 
@@ -15,11 +16,12 @@ namespace TrafficSim
         public Point CurrentLocation { get; set; }
         public byte StartTime { get; set; }
         public byte EndTime { get; set; }
-        public PathPossiblity PathToWork { get; set; }
-        public PathPossiblity PathToHome { get; set; }
+        public PathPossiblity PathToWork;
+        public PathPossiblity PathToHome;
         private static ITile[,] _map;
         private int[,] PathingHelper { get; }
         public static int PersonTracker = 0;
+  
 
 
         public Person(Home home, Office work, byte startByte, byte endByte, ITile[,] mapTiles, int[,] travelTimes)
@@ -33,13 +35,17 @@ namespace TrafficSim
             _map = mapTiles;
 
             PathingHelper = (int[,]) travelTimes.Clone();
+            PathToWork = new PathPossiblity();
+            PathToHome = new PathPossiblity();
             //From Home to Work
-            CalculatePath(Home.Location,Work.Location, PathToWork);
+            CalculatePath(Home.Location,Work.Location, ref PathToWork);
             //From Work to Home
-            CalculatePath(Work.Location,Home.Location, PathToHome);
+            CalculatePath(Work.Location,Home.Location, ref PathToHome);
         }
 
-        private void CalculatePath(Point startPoint, Point endPoint, PathPossiblity pathToDestination)
+        
+
+        private void CalculatePath(Point startPoint, Point endPoint, ref PathPossiblity pathToDestination)
         {
             for (int y = 0; y < 25; y++)
             {
@@ -178,7 +184,7 @@ namespace TrafficSim
             
             while (unfinsihedPathPossiblity.Count > 0)
             {
-                StepBranchedSearch(startPoint, endPoint, unfinsihedPathPossiblity, pathToDestination);
+                StepBranchedSearch(startPoint, endPoint, unfinsihedPathPossiblity, ref pathToDestination);
                 
             }
             
@@ -216,7 +222,7 @@ namespace TrafficSim
             return false;
         }
 
-        private void StepBranchedSearch(Point startPoint, Point endPoint,List<PathPossiblity> unfinishedPathPossiblities, PathPossiblity finishedDirections)
+        private void StepBranchedSearch(Point startPoint, Point endPoint,List<PathPossiblity> unfinishedPathPossiblities, ref PathPossiblity finishedDirections)
         {
             
             for (var i = 0; i < unfinishedPathPossiblities.Count; i++)
@@ -274,7 +280,7 @@ namespace TrafficSim
                     unfinishedPathPossiblities[i].Directions.Add(unfinishedPathPossiblities[i].NextDirection);
 
                 //Remove paths longer than the shortest path found
-                if (unfinishedPathPossiblities[i].PathLength > finishedDirections?.PathLength)
+                if (unfinishedPathPossiblities[i].PathLength > finishedDirections.PathLength && finishedDirections.PathLength != 0)
                 {
                     unfinishedPathPossiblities.RemoveAt(i);
                     i--;
