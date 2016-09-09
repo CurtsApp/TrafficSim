@@ -11,15 +11,16 @@ namespace TrafficSim
         public static int PersonTracker;
         public PathPossiblity PathToHome;
         public PathPossiblity PathToWork;
+        private int PathStep = 0;
+        private bool HeadedToWork = true;
+        private ulong TimeInTraffic = 0;
 
 
-        public Person(Home home, Office work, byte startByte, byte endByte, ITile[,] mapTiles, int[,] travelTimes)
+        public Person(Home home, Office work, ITile[,] mapTiles, int[,] travelTimes)
         {
             PersonTracker++;
             Home = home;
             Work = work;
-            StartTime = startByte;
-            EndTime = endByte;
             CurrentLocation = Home.Location;
             _map = mapTiles;
 
@@ -35,14 +36,12 @@ namespace TrafficSim
         public Home Home { get; set; }
         public Office Work { get; set; }
         public Point CurrentLocation { get; set; }
-        public byte StartTime { get; set; }
-        public byte EndTime { get; set; }
         private int[,] PathingHelper { get; }
 
 
         private void CalculatePath(Point startPoint, Point endPoint, ref PathPossiblity pathToDestination)
         {
-            for (var y = 0; y < 25; y++)
+           /* for (var y = 0; y < 25; y++)
             {
                 for (var x = 0; x < 25; x++)
                 {
@@ -64,7 +63,7 @@ namespace TrafficSim
                         {
                             Console.Write("{0} ", PathingHelper[x, y]);
                         }
-                    }
+                    }*/
                     /*else if (_map[x, y] is TwoLaneRoad)
                     {
                         Console.Write("  ");
@@ -85,9 +84,9 @@ namespace TrafficSim
                     {
                         Console.Write("V ");
                     }*/
-                }
-                Console.WriteLine();
-            }
+           //     }
+           //     Console.WriteLine();
+            //}
 
             var unfinsihedPathPossiblity = new List<PathPossiblity>();
 
@@ -211,7 +210,7 @@ namespace TrafficSim
         }
 
         private void StepBranchedSearch(Point startPoint, Point endPoint,
-            List<PathPossiblity> unfinishedPathPossiblities, ref PathPossiblity finishedDirections)
+        List<PathPossiblity> unfinishedPathPossiblities, ref PathPossiblity finishedDirections)
         {
             for (var i = 0; i < unfinishedPathPossiblities.Count; i++)
             {
@@ -401,27 +400,97 @@ namespace TrafficSim
             }
         }
 
-        /*
-         * Path Planning
-         * 
-         *Generate TimeToTraverse
-         Begin at home
-         calculate all possible paths to office using no backtrack rule //prevents infinite loops
-         run through all paths, find fastest path
-         return fastest path 
-         * 
-         * 
-         * 
-         */
+        public ulong GetTimeInTraffic()
+        {
+            return TimeInTraffic;
+        }
 
 
         public void Update()
         {
-        }
+            //If Headed to work path = path to work if headed home path = path to home
+            var path = HeadedToWork ? PathToWork.Directions : PathToHome.Directions;
+            var currentRoad = (Road)_map[CurrentLocation.GetX(), CurrentLocation.GetY()];
+            if (PathStep != path.Count - 1)
+            {
+                Road nextRoad;
+                switch (path[PathStep])
+                {
+                    case Direction.East:
+                        nextRoad = (Road) _map[CurrentLocation.GetX() + 1, CurrentLocation.GetY()];
+                        if (nextRoad.MergeToRoad(Direction.East))
+                        {
+                            //The person will always begin their path from an office.
+                            if (PathStep != 1)
+                            {
+                                currentRoad.LeaveRoad(path[PathStep - 1]);
+                            }
+                            PathStep++;
+                            CurrentLocation.SetX(CurrentLocation.GetX() + 1);
+                        }
+                        else
+                        {
+                            TimeInTraffic++;
+                        }
 
-        private bool CrossIntersection(Intersection intersection)
-        {
-            return true;
+                        break;
+                    case Direction.North:
+                        nextRoad = (Road) _map[CurrentLocation.GetX(), CurrentLocation.GetY() + 1];
+                        if (nextRoad.MergeToRoad(Direction.North))
+                        {
+                            //The person will always begin their path from an office.
+                            if (PathStep != 1)
+                            {
+                                currentRoad.LeaveRoad(path[PathStep - 1]);
+                            }
+                            PathStep++;
+                            CurrentLocation.SetY(CurrentLocation.GetY() + 1);
+                        }
+                        else
+                        {
+                            TimeInTraffic++;
+                        }
+                        break;
+                    case Direction.South:
+                        nextRoad = (Road) _map[CurrentLocation.GetX(), CurrentLocation.GetY() - 1];
+                        if (nextRoad.MergeToRoad(Direction.South))
+                        {
+                            //The person will always begin their path from an office.
+                            if (PathStep != 1)
+                            {
+                                currentRoad.LeaveRoad(path[PathStep - 1]);
+                            }
+                            PathStep++;
+                            CurrentLocation.SetY(CurrentLocation.GetY() - 1);
+                        }
+                        else
+                        {
+                            TimeInTraffic++;
+                        }
+                        break;
+                    case Direction.West:
+                        nextRoad = (Road) _map[CurrentLocation.GetX() - 1, CurrentLocation.GetY()];
+                        if (nextRoad.MergeToRoad(Direction.West))
+                        {
+                            //The person will always begin their path from an office.
+                            if (PathStep != 1)
+                            {
+                                currentRoad.LeaveRoad(path[PathStep - 1]);
+                            }
+                            PathStep++;
+                            CurrentLocation.SetX(CurrentLocation.GetX() - 1);
+                        }
+                        else
+                        {
+                            TimeInTraffic++;
+                        }
+                        break;
+                }
+            }
+            else
+            {
+                
+            }
         }
     }
 }

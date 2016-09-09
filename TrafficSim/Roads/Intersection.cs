@@ -1,27 +1,40 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using TrafficSim.PersonNavigation;
 
 namespace TrafficSim.Roads
-{ 
+{
     public class Intersection : ITile
     {
-        private ulong _timeToSwitch;
-        private bool _verticleGreen = true;
-        public Point Location { get; set; }
-        public static ulong CurrentTick { get; set; }
+        private readonly ulong _timeToSwitch;
+        private bool _verticleGreen;
 
 
-        public Intersection(ulong timeToSwtich, ulong currentTick)
+        public Intersection(ulong timeToSwtich, bool startVerticleTraffic)
         {
-            CurrentTick = currentTick;
+            
             _timeToSwitch = timeToSwtich;
+            _verticleGreen = startVerticleTraffic;
+        }
+
+        public static ulong CurrentTick { get; set; }
+        public Point Location { get; set; }
+
+        public void Update(ulong currentTick)
+        {
+            if (_timeToSwitch%currentTick == 0)
+            {
+                _verticleGreen = !_verticleGreen;
+            }
+        }
+
+        public bool CanCross(Direction travelingDirection)
+        {
+            //When verticle is Green allow N/S travel
+            if (_verticleGreen)
+            {
+                return travelingDirection == Direction.North || travelingDirection == Direction.South;
+            }
+            //When horizontal is Green allow E/W travel
+            return travelingDirection == Direction.East || travelingDirection == Direction.West;
         }
     }
 }
-
-        
-        
-    
-

@@ -25,7 +25,7 @@ namespace TrafficSim
         
         
 
-         public City(StartingValues startValues)
+        public City(StartingValues startValues)
         {
             
             _budget = startValues.Budget;
@@ -39,16 +39,44 @@ namespace TrafficSim
             LiveMap = GenerateLiveMap(LiveMap);
             TravelTimes = new int[_cityWidth, _cityHeight];
             GenerateTravelTimeHelper();
-            /*for (int y = 0; y < _cityHeight;y++)
+            PrintCity();
+             
+            GeneratePeople();
+
+             while (true)
+             {
+                 Tick();
+             }
+             
+        }
+
+        private void Tick()
+        {
+            TicksSinceStartUp++;
+            foreach (var person in _people)
             {
-                for (int x = 0; x < _cityWidth; x++)
+                person.Update();
+            }
+            foreach (var intersection in _intersections)
+            {
+                intersection.Update(TicksSinceStartUp);
+            }
+
+        }
+
+        private void PrintCity()
+        {
+            for (var y = 0; y < _cityHeight; y++)
+            {
+                for (var x = 0; x < _cityWidth; x++)
                 {
 
-                   
+
                     if (LiveMap[x, y] is TwoLaneRoad)
                     {
                         Console.Write("  ");
-                    } else if (LiveMap[x,y] is Home)
+                    }
+                    else if (LiveMap[x, y] is Home)
                     {
                         Console.Write("H ");
                     }
@@ -60,26 +88,12 @@ namespace TrafficSim
                     {
                         Console.Write("  ");
                     }
-                    
+
 
                 }
                 Console.WriteLine();
-             }*/
-             //Console.ReadLine();
-            GeneratePeople();
-             
-        }
-
-        public void Tick()
-        {
-            TicksSinceStartUp++;
-            foreach (Person person in _people)
-            {
-                person.Update();
             }
-
         }
-
         private void GenerateTravelTimeHelper()
         {
             
@@ -127,7 +141,7 @@ namespace TrafficSim
                             break;
                             //Intersection
                         case 3:
-                            Intersection bufferIntersection = new Intersection(_traffictCycleTime, TicksSinceStartUp);
+                            Intersection bufferIntersection = new Intersection(_traffictCycleTime, true);
                             _intersections.Add(bufferIntersection);
                             LiveMap[x, y] = bufferIntersection;
                             break;
@@ -196,7 +210,7 @@ namespace TrafficSim
                         var distanceFromCenter = Math.Sqrt(xSquared + ySquared);
                         var percentFromCenter = distanceFromCenter/Math.Sqrt(maxXSquared + maxYSquared);
                    
-                        if (.5 < percentFromCenter)
+                        if (rng < percentFromCenter)
                         {
                             zones.Map[x, y] = Zone.Residential;
                         }
@@ -217,28 +231,13 @@ namespace TrafficSim
         {
             for (ulong i = 0; i < _population; i++)
             {
-                //Nightshift is being removed for early stages, it may or may not be implmented in final.
-                var isNightShift = false; //= _rand.Next(101) < 10;
-                var scheduleShift = _rand.Next(-2,3);
-                int startTime;
-
-                //Nightshift is not implemented at this time.
-                if (isNightShift)
-                {
-                    startTime = 22 + scheduleShift;
-                }
-                else
-                {
-                    startTime = 8 + scheduleShift;
-                }
-                var endTime = startTime + 8;
-                if (endTime > 24)
-                {
-                    endTime = endTime - 24;
-                }
+               
                 var personBuffer = new Person(_homes[_rand.Next(_homes.Count)], _offices[_rand.Next(_offices.Count)],
-                    (byte) startTime, (byte) endTime, LiveMap, TravelTimes);
+                    LiveMap, TravelTimes);
                 _people.Add(personBuffer);
+                Console.Clear();
+                var percentComplete = i / (double)_population;
+                Console.Write($"People Created {i + 1} {Math.Ceiling(percentComplete * 100)}%");
 
             }
         }
