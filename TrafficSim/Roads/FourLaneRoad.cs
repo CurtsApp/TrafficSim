@@ -5,12 +5,10 @@ namespace TrafficSim.Roads
     {
         
 
-        public FourLaneRoad(Point startPoint, Point endPoint) 
+        public FourLaneRoad() 
         {
             NumberOfLanes = 4;
             TimeToTraverse = 35;
-            Start = startPoint;
-            End = endPoint;
             Cost = 5;
         }
 

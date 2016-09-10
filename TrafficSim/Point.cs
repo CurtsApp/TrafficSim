@@ -8,10 +8,10 @@ namespace TrafficSim
         private int X { get; set; }
         private int Y { get; set; }
 
-        public Point(int _x, int _y)
+        public Point(int x, int y)
         {
-            X = _x;
-            Y = _y;
+            X = x;
+            Y = y;
         }
         
         public int GetX()
@@ -32,6 +32,11 @@ namespace TrafficSim
         public void SetY(int newY)
         {
             Y = newY;
+        }
+
+        public bool IsEqual(Point point)
+        {
+            return this.GetX() == point.GetX() && this.GetY() == point.GetY();
         }
     }
 }

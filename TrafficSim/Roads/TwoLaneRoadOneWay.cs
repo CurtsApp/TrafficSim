@@ -10,8 +10,6 @@ namespace TrafficSim.Roads
         {
             NumberOfLanes = 2;
             TimeToTraverse = 40;
-            Start = startPoint;
-            End = endPoint;
             Cost = 3;
         }
 

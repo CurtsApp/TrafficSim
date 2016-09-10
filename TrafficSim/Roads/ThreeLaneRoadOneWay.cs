@@ -11,8 +11,7 @@ namespace TrafficSim.Roads
         {
             NumberOfLanes = 3;
             TimeToTraverse = 30;
-            Start = startPoint;
-            End = endPoint;
+            TimeToTraverse = 30;
         }
 
         
