@@ -1,6 +1,8 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.IO;
+using Newtonsoft.Json;
 using TrafficSim.Roads;
 
 
@@ -22,12 +24,14 @@ namespace TrafficSim
         private List<Intersection> _intersections = new List<Intersection>();
         public ulong TicksSinceStartUp { get; set; }
         public int [,] TravelTimes { get; set; }
+        private String storagePath;
         
         
 
         public City(StartingValues startValues)
         {
-            
+            storagePath = startValues.StoragePath;
+
             _budget = startValues.Budget;
              _traffictCycleTime = startValues.TrafficLightCycleTimeDefault;
             _cityHeight = startValues.MapHeight;
@@ -40,8 +44,15 @@ namespace TrafficSim
             TravelTimes = new int[_cityWidth, _cityHeight];
             GenerateTravelTimeHelper();
             PrintCity();
-             
-            GeneratePeople();
+            if (File.Exists(storagePath))
+            {
+                LoadPeopleFromFile();
+            }
+            else
+            {
+                GeneratePeople();
+            }
+            
 
              while (true)
              {
@@ -231,6 +242,16 @@ namespace TrafficSim
             return zones;
         }
 
+        private void LoadPeopleFromFile()
+        {
+            _people = JsonConvert.DeserializeObject<List<Person>>(File.ReadAllText(storagePath));
+        }
+
+        private void WritePeopleToFile()
+        {
+            File.WriteAllText(@storagePath, JsonConvert.SerializeObject(_people));
+
+        }
         private void GeneratePeople()
         {
             for (ulong i = 0; i < _population; i++)
@@ -244,6 +265,7 @@ namespace TrafficSim
                 Console.Write($"People Created {i + 1} {Math.Ceiling(percentComplete * 100)}%");
 
             }
+            WritePeopleToFile();
         }
     }
 }

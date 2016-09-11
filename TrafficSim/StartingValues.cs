@@ -8,5 +8,6 @@ namespace TrafficSim
         public ulong Budget;
         public ulong Population;
         public ulong TrafficLightCycleTimeDefault;
+        public string StoragePath;
     }
 }
