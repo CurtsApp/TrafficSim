@@ -55,7 +55,11 @@ namespace TrafficSim
             TicksSinceStartUp++;
             foreach (var person in _people)
             {
-                person.Update();
+                if (!person.IsFinishedTraveling())
+                {
+                    person.Update();
+                }
+                
             }
             foreach (var intersection in _intersections)
             {

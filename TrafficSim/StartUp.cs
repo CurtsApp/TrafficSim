@@ -4,12 +4,16 @@
     {
         static void Main(string[] args)
         {
-            StartingValues config = new StartingValues();
-            config.Budget = 1000000; //1Million
-            config.MapHeight = 25;
-            config.MapWidth = 25;
-            config.Population = 5000;
-            config.TrafficLightCycleTimeDefault = 120; //Measured in ticks, 60mph = 60ticks
+            StartingValues config = new StartingValues
+            {
+                Budget = 1000000,//1Million
+                MapHeight = 25,
+                MapWidth = 25,
+                Population = 5000,
+                TrafficLightCycleTimeDefault = 120//Measured in ticks, 60mph = 60ticks
+            };
+            
+            
             City city = new City(config);
 
         }
