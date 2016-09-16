@@ -24,6 +24,7 @@ namespace TrafficSim
             Work = work;
             CurrentLocation = Home.Location;
             _map = mapTiles;
+            TimeInTraffic = 0;
 
             PathingHelper = (int[,]) travelTimes.Clone();
             PathToWork = new PathPossiblity();
@@ -42,53 +43,8 @@ namespace TrafficSim
 
         private void CalculatePath(Point startPoint, Point endPoint, ref PathPossiblity pathToDestination)
         {
-            /* for (var y = 0; y < 25; y++)
-            {
-                for (var x = 0; x < 25; x++)
-                {
-                    if (x == Home.Location.GetX() && y == Home.Location.GetY())
-                    {
-                        Console.Write("X  ");
-                    }
-                    else if (x == Work.Location.GetX() && y == Work.Location.GetY())
-                    {
-                        Console.Write("Y  ");
-                    }
-                    else
-                    {
-                        if (PathingHelper[x, y] == 0f)
-                        {
-                            Console.Write("{0}  ", PathingHelper[x, y]);
-                        }
-                        else
-                        {
-                            Console.Write("{0} ", PathingHelper[x, y]);
-                        }
-                    }*/
-            /*else if (_map[x, y] is TwoLaneRoad)
-                    {
-                        Console.Write("  ");
-                    }
-                    else if (_map[x, y] is Home)
-                    {
-                        Console.Write("H ");
-                    }
-                    else if (_map[x, y] is Office)
-                    {
-                        Console.Write("O ");
-                    }
-                    else if (_map[x, y] is Intersection)
-                    {
-                        Console.Write("  ");
-                    }
-                    else if (_map[x, y] is Vacant)
-                    {
-                        Console.Write("V ");
-                    }*/
-            //     }
-            //     Console.WriteLine();
-            //}
-
+            
+             
             var unfinsihedPathPossiblity = new List<PathPossiblity>();
 
 
@@ -265,7 +221,8 @@ namespace TrafficSim
                 }
                 //After position calculation add the NextDirection to List<Directions> for future copying
                 unfinishedPathPossiblities[i].Directions.Add(unfinishedPathPossiblities[i].NextDirection);
-
+                
+                
 
                 //Remove paths longer than the shortest path found
                 if (unfinishedPathPossiblities[i].PathLength > finishedDirections.PathLength &&
@@ -289,14 +246,14 @@ namespace TrafficSim
                     unfinishedPathPossiblities.RemoveAt(i);
                     i--;
                 }
-                else if (currentPos.GetX() == endPoint.GetX() && currentPos.GetY() == endPoint.GetY() + 1)
+                else if (currentPos.GetX() == endPoint.GetX() && currentPos.GetY() + 1 == endPoint.GetY())
                 {
                     unfinishedPathPossiblities[i].Directions.Add(Direction.North);
                     finishedDirections = unfinishedPathPossiblities[i];
                     unfinishedPathPossiblities.RemoveAt(i);
                     i--;
                 }
-                else if (currentPos.GetX() == endPoint.GetX() && currentPos.GetY() == endPoint.GetY() - 1)
+                else if (currentPos.GetX() == endPoint.GetX() && currentPos.GetY() -1 == endPoint.GetY())
                 {
                     unfinishedPathPossiblities[i].Directions.Add(Direction.South);
                     finishedDirections = unfinishedPathPossiblities[i];
@@ -406,6 +363,11 @@ namespace TrafficSim
         {
             return TimeInTraffic;
         }
+
+        public bool IsFinishedTraveling()
+        {
+            return FinishedTraveling;
+        }
         //Moves the CurrentLocation varibale relative to the passed in direction
         private void Move(Direction directon)
         {
@@ -454,6 +416,51 @@ namespace TrafficSim
                     return GetTile(0, 0);
             }
         }
+        //Gets the tile relative to current location using 2 directions, this is for intersection pathing
+        private ITile GetTile(Direction directon, Direction secondDirection)
+        {
+            var xOffset = 0;
+            var yOffset = 0;
+
+            switch (directon)
+            {
+                case Direction.East:
+                    xOffset++;
+                    break;
+                case Direction.North:
+                    yOffset++;
+                    break;
+
+                case Direction.South:
+                    yOffset--;
+                    break;
+
+                case Direction.West:
+                    xOffset--;
+                    break;
+                
+            }
+            switch (secondDirection)
+            {
+                case Direction.East:
+                    xOffset++;
+                    break;
+                case Direction.North:
+                    yOffset++;
+                    break;
+
+                case Direction.South:
+                    yOffset--;
+                    break;
+
+                case Direction.West:
+                    xOffset--;
+                    break;
+                
+            }
+
+            return GetTile(xOffset, yOffset);
+        }
         //If no parameters are given GetTile(); will return currentLocation Tile
         private ITile GetTile(int xOffset = 0, int yOffset = 0)
         {
@@ -462,45 +469,62 @@ namespace TrafficSim
 
         public void Update()
         {
+            
+            
             //If Headed to work path = path to work if headed home path = path to home
             var path = HeadedToWork ? PathToWork.Directions : PathToHome.Directions;
-            var tile = _map[CurrentLocation.GetX(), CurrentLocation.GetY()];
-
-            if (PathStep != path.Count - 1)
-            {
-                if (tile is Road)
+            
+            
+                if (GetTile(path[PathStep]) is Road)
                 {
-                    var road = (Road) GetTile();
-                    if (road.MergeToRoad(path[PathStep]))
+                    var road = (Road) GetTile(path[PathStep]);
+                //Uses the direction you will be traveling once on the road. Not the direction to join the road
+                    if (road.MergeToRoad(path[PathStep + 1]))
                     {
                         
-                        PathStep++;
                         Move(path[PathStep]);
+                        PathStep++;
                     }
                     else
                     {
                         TimeInTraffic++;
                     }
 
-                } else if (tile is Home)
+                } else if (GetTile(path[PathStep]) is Home)
                 {
+                    Move(path[PathStep]);
+                    PathStep++;
+                } else if (GetTile(path[PathStep]) is Office)
+                {
+                    Move(path[PathStep]);
+                    PathStep++;
+                }
+                else if( GetTile(path[PathStep]) is Intersection)
+                {
+                    var road = (Road)GetTile(path[PathStep], path[PathStep + 1]);
+                    var intersection = (Intersection) GetTile(path[PathStep]);
+                if (road.MergeToRoad(path[PathStep + 1]) && intersection.CanCross(path[PathStep]))
+                {
+                    //Move to intersection
                     
-                } else if (tile is Office)
-                {
-
+                    Move(path[PathStep]);
+                    PathStep++;
+                    //Move onto  road
+                    
+                    Move(path[PathStep]);
+                    PathStep++;
                 }
                 else
                 {
-                    
-
+                    TimeInTraffic++;
                 }
 
             }
-            else
-            {
-                
-            }
-            
+            //Allow City to decide if this person should continue to be updated
+            FinishedTraveling = PathStep > path.Count - 1;
         }
+           
+            
+        
     }
 }

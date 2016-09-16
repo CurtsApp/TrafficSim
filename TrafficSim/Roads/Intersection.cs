@@ -28,6 +28,7 @@ namespace TrafficSim.Roads
 
         public bool CanCross(Direction travelingDirection)
         {
+            return true;
             //When verticle is Green allow N/S travel
             if (_verticleGreen)
             {

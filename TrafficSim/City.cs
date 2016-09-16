@@ -43,18 +43,19 @@ namespace TrafficSim
             LiveMap = GenerateLiveMap(LiveMap);
             TravelTimes = new int[_cityWidth, _cityHeight];
             GenerateTravelTimeHelper();
-            PrintCity();
+            
             if (File.Exists(storagePath))
             {
-                LoadPeopleFromFile();
+                GeneratePeople();
+                //LoadPeopleFromFile();
             }
             else
             {
                 GeneratePeople();
             }
-            
 
-             while (true)
+            PrintCity();
+            while (true)
              {
                  Tick();
              }
@@ -72,6 +73,9 @@ namespace TrafficSim
                 }
                 
             }
+            
+            Console.Clear();
+            PrintCity();
             foreach (var intersection in _intersections)
             {
                 intersection.Update(TicksSinceStartUp);
@@ -81,13 +85,17 @@ namespace TrafficSim
 
         private void PrintCity()
         {
+            
             for (var y = 0; y < _cityHeight; y++)
             {
                 for (var x = 0; x < _cityWidth; x++)
                 {
 
-
-                    if (LiveMap[x, y] is TwoLaneRoad)
+                    if (x == _people[0].CurrentLocation.GetX() && y == _people[0].CurrentLocation.GetY())
+                    {
+                        Console.Write("R ");
+                    }
+                    else if (LiveMap[x, y] is TwoLaneRoad)
                     {
                         Console.Write("  ");
                     }
@@ -100,6 +108,10 @@ namespace TrafficSim
                         Console.Write("O ");
                     }
                     else if (LiveMap[x, y] is Intersection)
+                    {
+                        Console.Write("  ");
+                    }
+                    else if (LiveMap[x, y] is Vacant)
                     {
                         Console.Write("  ");
                     }
