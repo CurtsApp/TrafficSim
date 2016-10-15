@@ -46,8 +46,8 @@ namespace TrafficSim
             
             if (File.Exists(storagePath))
             {
-                GeneratePeople();
-                //LoadPeopleFromFile();
+                
+                LoadPeopleFromFile();
             }
             else
             {
@@ -262,7 +262,7 @@ namespace TrafficSim
         private void WritePeopleToFile()
         {
             File.WriteAllText(@storagePath, JsonConvert.SerializeObject(_people));
-
+           
         }
         private void GeneratePeople()
         {

@@ -23,10 +23,12 @@ namespace TrafficSim
             Home = home;
             Work = work;
             CurrentLocation = Home.Location;
+            PathingHelper = travelTimes;
             _map = mapTiles;
+            
+           
             TimeInTraffic = 0;
-
-            PathingHelper = (int[,]) travelTimes.Clone();
+            
             PathToWork = new PathPossiblity();
             PathToHome = new PathPossiblity();
             //From Home to Work
