@@ -11,6 +11,7 @@ namespace TrafficSim.Roads
             TimeToTraverse = 55;
             Location = location;
             Cost = 3;
+            ClassName = "TwoLaneRoad";
         }
 
     }

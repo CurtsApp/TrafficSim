@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using TrafficSim.PersonNavigation;
 using TrafficSim.Roads;
 
@@ -7,28 +8,27 @@ namespace TrafficSim
 {
     public class Person
     {
-        private static ITile[,] _map;
         public static int PersonTracker;
+        public static int[,] PathingHelper;
         private readonly bool HeadedToWork = true;
+        private bool FinishedTraveling;
         private int PathStep;
         public PathPossiblity PathToHome;
         public PathPossiblity PathToWork;
         private ulong TimeInTraffic;
-        private bool FinishedTraveling = false;
 
 
-        public Person(Home home, Office work, ITile[,] mapTiles, int[,] travelTimes)
+        public Person(Home home, Office work, ITile[,] map, int[,] pathingHelper)
         {
             PersonTracker++;
             Home = home;
             Work = work;
             CurrentLocation = Home.Location;
-            PathingHelper = travelTimes;
-            _map = mapTiles;
-            
-           
+            PathingHelper = pathingHelper;
+            Map = map;
+
             TimeInTraffic = 0;
-            
+
             PathToWork = new PathPossiblity();
             PathToHome = new PathPossiblity();
             //From Home to Work
@@ -37,16 +37,30 @@ namespace TrafficSim
             CalculatePath(Work.Location, Home.Location, ref PathToHome);
         }
 
+        [JsonConstructor]
+        public Person(Home home, Office work, PathPossiblity pathToWork, PathPossiblity pathToHome)
+        {
+            PersonTracker++;
+            Home = home;
+            Work = work;
+            CurrentLocation = Home.Location;
+
+
+            TimeInTraffic = 0;
+
+            PathToWork = pathToWork;
+            PathToHome = pathToHome;
+        }
+
+        public static ITile[,] Map { get; set; }
+
         public Home Home { get; set; }
         public Office Work { get; set; }
         public Point CurrentLocation { get; set; }
-        private int[,] PathingHelper { get; }
 
 
         private void CalculatePath(Point startPoint, Point endPoint, ref PathPossiblity pathToDestination)
         {
-            
-             
             var unfinsihedPathPossiblity = new List<PathPossiblity>();
 
 
@@ -223,8 +237,7 @@ namespace TrafficSim
                 }
                 //After position calculation add the NextDirection to List<Directions> for future copying
                 unfinishedPathPossiblities[i].Directions.Add(unfinishedPathPossiblities[i].NextDirection);
-                
-                
+
 
                 //Remove paths longer than the shortest path found
                 if (unfinishedPathPossiblities[i].PathLength > finishedDirections.PathLength &&
@@ -255,7 +268,7 @@ namespace TrafficSim
                     unfinishedPathPossiblities.RemoveAt(i);
                     i--;
                 }
-                else if (currentPos.GetX() == endPoint.GetX() && currentPos.GetY() -1 == endPoint.GetY())
+                else if (currentPos.GetX() == endPoint.GetX() && currentPos.GetY() - 1 == endPoint.GetY())
                 {
                     unfinishedPathPossiblities[i].Directions.Add(Direction.South);
                     finishedDirections = unfinishedPathPossiblities[i];
@@ -370,6 +383,7 @@ namespace TrafficSim
         {
             return FinishedTraveling;
         }
+
         //Moves the CurrentLocation varibale relative to the passed in direction
         private void Move(Direction directon)
         {
@@ -392,12 +406,14 @@ namespace TrafficSim
                     break;
             }
         }
+
         //Moves the CurrentLocation variable relative to the passed in integers
         private void Move(int xOffset = 0, int yOffset = 0)
         {
             CurrentLocation.SetX(CurrentLocation.GetX() + xOffset);
             CurrentLocation.SetY(CurrentLocation.GetY() + yOffset);
         }
+
         //Gets the tile relative to current location using direction
         private ITile GetTile(Direction directon)
         {
@@ -418,6 +434,7 @@ namespace TrafficSim
                     return GetTile(0, 0);
             }
         }
+
         //Gets the tile relative to current location using 2 directions, this is for intersection pathing
         private ITile GetTile(Direction directon, Direction secondDirection)
         {
@@ -440,7 +457,6 @@ namespace TrafficSim
                 case Direction.West:
                     xOffset--;
                     break;
-                
             }
             switch (secondDirection)
             {
@@ -458,61 +474,29 @@ namespace TrafficSim
                 case Direction.West:
                     xOffset--;
                     break;
-                
             }
 
             return GetTile(xOffset, yOffset);
         }
+
         //If no parameters are given GetTile(); will return currentLocation Tile
         private ITile GetTile(int xOffset = 0, int yOffset = 0)
         {
-            return _map[CurrentLocation.GetX() + xOffset, CurrentLocation.GetY() + yOffset];
+            return Map[CurrentLocation.GetX() + xOffset, CurrentLocation.GetY() + yOffset];
         }
 
         public void Update()
         {
-            
-            
             //If Headed to work path = path to work if headed home path = path to home
             var path = HeadedToWork ? PathToWork.Directions : PathToHome.Directions;
-            
-            
-                if (GetTile(path[PathStep]) is Road)
-                {
-                    var road = (Road) GetTile(path[PathStep]);
-                //Uses the direction you will be traveling once on the road. Not the direction to join the road
-                    if (road.MergeToRoad(path[PathStep + 1]))
-                    {
-                        
-                        Move(path[PathStep]);
-                        PathStep++;
-                    }
-                    else
-                    {
-                        TimeInTraffic++;
-                    }
 
-                } else if (GetTile(path[PathStep]) is Home)
+
+            if (GetTile(path[PathStep]) is Road)
+            {
+                var road = (Road) GetTile(path[PathStep]);
+                //Uses the direction you will be traveling once on the road. Not the direction to join the road
+                if (road.MergeToRoad(path[PathStep + 1]))
                 {
-                    Move(path[PathStep]);
-                    PathStep++;
-                } else if (GetTile(path[PathStep]) is Office)
-                {
-                    Move(path[PathStep]);
-                    PathStep++;
-                }
-                else if( GetTile(path[PathStep]) is Intersection)
-                {
-                    var road = (Road)GetTile(path[PathStep], path[PathStep + 1]);
-                    var intersection = (Intersection) GetTile(path[PathStep]);
-                if (road.MergeToRoad(path[PathStep + 1]) && intersection.CanCross(path[PathStep]))
-                {
-                    //Move to intersection
-                    
-                    Move(path[PathStep]);
-                    PathStep++;
-                    //Move onto  road
-                    
                     Move(path[PathStep]);
                     PathStep++;
                 }
@@ -520,13 +504,39 @@ namespace TrafficSim
                 {
                     TimeInTraffic++;
                 }
+            }
+            else if (GetTile(path[PathStep]) is Home)
+            {
+                Move(path[PathStep]);
+                PathStep++;
+            }
+            else if (GetTile(path[PathStep]) is Office)
+            {
+                Move(path[PathStep]);
+                PathStep++;
+            }
+            else if (GetTile(path[PathStep]) is Intersection)
+            {
+                var road = (Road) GetTile(path[PathStep], path[PathStep + 1]);
+                var intersection = (Intersection) GetTile(path[PathStep]);
+                if (road.MergeToRoad(path[PathStep + 1]) && intersection.CanCross(path[PathStep]))
+                {
+                    //Move to intersection
 
+                    Move(path[PathStep]);
+                    PathStep++;
+                    //Move onto  road
+
+                    Move(path[PathStep]);
+                    PathStep++;
+                }
+                else
+                {
+                    TimeInTraffic++;
+                }
             }
             //Allow City to decide if this person should continue to be updated
             FinishedTraveling = PathStep > path.Count - 1;
         }
-           
-            
-        
     }
 }

@@ -24,13 +24,16 @@ namespace TrafficSim
         private List<Intersection> _intersections = new List<Intersection>();
         public ulong TicksSinceStartUp { get; set; }
         public int [,] TravelTimes { get; set; }
-        private String storagePath;
+        private string storagePathPeople;
+        private string storagePathMap;
+        private bool allFinishedTraveling = false;
         
         
 
         public City(StartingValues startValues)
         {
-            storagePath = startValues.StoragePath;
+            storagePathPeople = startValues.StoragePath;
+            storagePathMap = startValues.StoragePathMap;
 
             _budget = startValues.Budget;
              _traffictCycleTime = startValues.TrafficLightCycleTimeDefault;
@@ -44,7 +47,7 @@ namespace TrafficSim
             TravelTimes = new int[_cityWidth, _cityHeight];
             GenerateTravelTimeHelper();
             
-            if (File.Exists(storagePath))
+            if (File.Exists(storagePathPeople))
             {
                 
                 LoadPeopleFromFile();
@@ -65,17 +68,25 @@ namespace TrafficSim
         private void Tick()
         {
             TicksSinceStartUp++;
+            allFinishedTraveling = true;
             foreach (var person in _people)
             {
                 if (!person.IsFinishedTraveling())
                 {
                     person.Update();
+                    allFinishedTraveling = false;
                 }
                 
             }
-            
-            Console.Clear();
-            PrintCity();
+            if (!allFinishedTraveling)
+            {
+                foreach (var person in _people)
+                {
+                   // person.
+                }
+            }
+            //Console.Clear();
+            //PrintCity();
             foreach (var intersection in _intersections)
             {
                 intersection.Update(TicksSinceStartUp);
@@ -256,13 +267,18 @@ namespace TrafficSim
 
         private void LoadPeopleFromFile()
         {
-            _people = JsonConvert.DeserializeObject<List<Person>>(File.ReadAllText(storagePath));
+            _people = JsonConvert.DeserializeObject<List<Person>>(File.ReadAllText(storagePathPeople));
+            JsonConverter[] converters = {new TileConverter()};
+            Person.Map = JsonConvert.DeserializeObject<ITile[,]>(File.ReadAllText(storagePathMap),
+                new JsonSerializerSettings() {Converters = converters});
+            //Person.PathingHelper = 
         }
 
+        
         private void WritePeopleToFile()
         {
-            File.WriteAllText(@storagePath, JsonConvert.SerializeObject(_people));
-           
+            File.WriteAllText(@storagePathPeople, JsonConvert.SerializeObject(_people));
+            File.WriteAllText(@storagePathMap, JsonConvert.SerializeObject(Person.Map));
         }
         private void GeneratePeople()
         {

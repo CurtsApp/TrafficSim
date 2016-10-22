@@ -17,13 +17,14 @@ namespace TrafficSim
 
                
             };
-            
+            //TODO Make a storage path to store the tile map and pathing helper
             var ExecutablePath = System.Reflection.Assembly.GetEntryAssembly().CodeBase;
             String[] executableLocation = ExecutablePath.Split('/');
             for (int i = 3; i < executableLocation.Length - 1; i++)
             {
                 config.StoragePath = config.StoragePath + executableLocation[i] + "/";
             }
+            config.StoragePathMap = config.StoragePath + "mapInfo.json";
             config.StoragePath = config.StoragePath + "people.json";
             Console.WriteLine(config.StoragePath);
             var city = new City(config);

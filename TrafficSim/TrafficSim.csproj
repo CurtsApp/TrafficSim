@@ -67,6 +67,7 @@
     <Compile Include="Roads\TwoLaneRoadOneWay.cs" />
     <Compile Include="Roads\TwoLaneRoad.cs" />
     <Compile Include="StartingValues.cs" />
+    <Compile Include="TileConverter.cs" />
     <Compile Include="Vacant.cs" />
     <Compile Include="Zone.cs" />
     <Compile Include="ZoneMap.cs" />

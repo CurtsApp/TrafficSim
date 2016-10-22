@@ -10,13 +10,14 @@ namespace TrafficSim.Roads
 
         public Intersection(ulong timeToSwtich, bool startVerticleTraffic)
         {
-            
+            ClassName = "Intersection";
             _timeToSwitch = timeToSwtich;
             _verticleGreen = startVerticleTraffic;
         }
 
         public static ulong CurrentTick { get; set; }
         public Point Location { get; set; }
+        public string ClassName { get; set; }
 
         public void Update(ulong currentTick)
         {

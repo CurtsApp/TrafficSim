@@ -12,6 +12,7 @@ namespace TrafficSim.Roads
             NumberOfLanes = 3;
             TimeToTraverse = 30;
             TimeToTraverse = 30;
+            ClassName = "ThreeLaneRoadOneWay";
         }
 
         

@@ -9,5 +9,6 @@ namespace TrafficSim
         public ulong Population;
         public ulong TrafficLightCycleTimeDefault;
         public string StoragePath;
+        public string StoragePathMap;
     }
 }

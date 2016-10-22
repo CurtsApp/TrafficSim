@@ -15,8 +15,9 @@ namespace TrafficSim.Roads
 
 
         public Point Location { get; set; }
+        public string ClassName { get; set; }
 
-
+        
         public bool MergeToRoad(Direction headedDirection)
         {
             if (headedDirection == Direction.East || headedDirection == Direction.North)

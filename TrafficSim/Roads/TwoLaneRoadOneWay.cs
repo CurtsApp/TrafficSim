@@ -11,6 +11,7 @@ namespace TrafficSim.Roads
             NumberOfLanes = 2;
             TimeToTraverse = 40;
             Cost = 3;
+            ClassName = "TwoLaneRoadOneWay";
         }
 
        

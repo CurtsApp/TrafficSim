@@ -10,6 +10,7 @@ namespace TrafficSim.Roads
             NumberOfLanes = 4;
             TimeToTraverse = 35;
             Cost = 5;
+            ClassName = "FourLaneRoad";
         }
 
 
