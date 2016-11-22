@@ -49,8 +49,9 @@ namespace TrafficSim
             
             if (File.Exists(storagePathPeople))
             {
-                
+                //GeneratePeople();
                 LoadPeopleFromFile();
+                //TODO ReEnable Saving after debugging
             }
             else
             {
@@ -67,26 +68,47 @@ namespace TrafficSim
 
         private void Tick()
         {
+            Console.Clear();
+            //PrintPeople();
+            PrintRoadOccupancy();
             TicksSinceStartUp++;
             allFinishedTraveling = true;
+
+            
+            
             foreach (var person in _people)
             {
                 if (!person.IsFinishedTraveling())
                 {
-                    person.Update();
+                    Console.Clear();
+                    //PrintPeople();
+                    PrintRoadOccupancy();
+                    person.Update2();
+                    
                     allFinishedTraveling = false;
+                    
                 }
                 
             }
-            if (!allFinishedTraveling)
+            /*for (int i = 0; i < _people.Count; i++)
             {
-                foreach (var person in _people)
+                if (!_people[i].IsFinishedTraveling())
                 {
-                   // person.
+                    Console.Write(i + ",");
+
                 }
             }
-            //Console.Clear();
-            //PrintCity();
+            Console.WriteLine();*/
+            if (allFinishedTraveling)
+            {
+                
+                foreach (var person in _people)
+                {
+                   person.ReverseDirection();
+                }
+            }
+           
+           
             foreach (var intersection in _intersections)
             {
                 intersection.Update(TicksSinceStartUp);
@@ -94,6 +116,66 @@ namespace TrafficSim
 
         }
 
+        private void PrintRoadOccupancy()
+        {
+            for (int i = 0; i < _cityHeight; i++)
+            {
+                for (int j = 0; j < _cityWidth; j++)
+                {
+                    var live = Person.Map[j, i] as Road;
+                    if (live != null)
+                    {
+                        Road road = live;
+                        if (road.DirectionAOccupancy > 9 || road.DirectionAOccupancy < 0)
+                        {
+                            Console.Write(road.DirectionAOccupancy + " ");
+                        }
+                        else
+                        {
+                            Console.Write(road.DirectionAOccupancy + "  ");
+                        }
+                    }
+                    else
+                    {
+                        Console.Write("   ");
+                    }
+                }
+                Console.WriteLine();
+            }
+        }
+        private void PrintPeople()
+        {
+            int[,] peopleLocation = new int[_cityWidth,_cityHeight];
+            for (int i = 0; i < _cityHeight; i++)
+            {
+                for (int j = 0; j < _cityWidth; j++)
+                {
+                    peopleLocation[j, i] = 0;
+                }
+            }
+            foreach (var person in _people)
+            {
+                
+                    peopleLocation[person.CurrentLocation.GetX(), person.CurrentLocation.GetY()]++;
+                
+            }
+            for (int i = 0; i < _cityHeight; i++)
+            {
+                for (int j = 0; j < _cityWidth; j++)
+                {
+                    if (peopleLocation[j, i] > 9)
+                    {
+                        Console.Write(peopleLocation[j, i] + " ");
+                    }
+                    else
+                    {
+                        Console.Write(peopleLocation[j, i] + "  ");
+                    }
+                    
+                }
+                Console.WriteLine();
+            }
+        }
         private void PrintCity()
         {
             
@@ -271,7 +353,8 @@ namespace TrafficSim
             JsonConverter[] converters = {new TileConverter()};
             Person.Map = JsonConvert.DeserializeObject<ITile[,]>(File.ReadAllText(storagePathMap),
                 new JsonSerializerSettings() {Converters = converters});
-            //Person.PathingHelper = 
+            
+            
         }
 
         

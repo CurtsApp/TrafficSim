@@ -10,8 +10,8 @@ namespace TrafficSim.Roads
 
 
         public double Cost { get; set; }
-        public ushort DirectionAOccupancy { get; set; }
-        public ushort DirectionBOccupancy { get; set; }
+        public int DirectionAOccupancy { get; set; }
+        public int DirectionBOccupancy { get; set; }
 
 
         public Point Location { get; set; }

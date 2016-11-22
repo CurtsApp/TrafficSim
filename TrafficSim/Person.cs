@@ -10,7 +10,7 @@ namespace TrafficSim
     {
         public static int PersonTracker;
         public static int[,] PathingHelper;
-        private readonly bool HeadedToWork = true;
+        private bool HeadedToWork = true;
         private bool FinishedTraveling;
         private int PathStep;
         public PathPossiblity PathToHome;
@@ -379,6 +379,13 @@ namespace TrafficSim
             return TimeInTraffic;
         }
 
+        //Indicate to the person to head back the opposite direction along their path
+        public void ReverseDirection()
+        {
+            HeadedToWork = !HeadedToWork;
+            PathStep = 0;
+            FinishedTraveling = false;
+        }
         public bool IsFinishedTraveling()
         {
             return FinishedTraveling;
@@ -485,6 +492,7 @@ namespace TrafficSim
             return Map[CurrentLocation.GetX() + xOffset, CurrentLocation.GetY() + yOffset];
         }
 
+        
         public void Update()
         {
             //If Headed to work path = path to work if headed home path = path to home
@@ -498,6 +506,10 @@ namespace TrafficSim
                 if (road.MergeToRoad(path[PathStep + 1]))
                 {
                     Move(path[PathStep]);
+                    if (PathStep != 0)
+                    {
+                        road.LeaveRoad(path[PathStep]);
+                    }
                     PathStep++;
                 }
                 else
@@ -508,6 +520,7 @@ namespace TrafficSim
             else if (GetTile(path[PathStep]) is Home)
             {
                 Move(path[PathStep]);
+                
                 PathStep++;
             }
             else if (GetTile(path[PathStep]) is Office)
@@ -538,5 +551,123 @@ namespace TrafficSim
             //Allow City to decide if this person should continue to be updated
             FinishedTraveling = PathStep > path.Count - 1;
         }
+        public void Update2()
+        {
+            //If Headed to work path = path to work if headed home path = path to home
+            var path = HeadedToWork ? PathToWork.Directions : PathToHome.Directions;
+
+            var currentTile = GetTile();
+            var nextTile = GetTile(path[PathStep]);
+            //Must be initlized with a value but once person approaches end of path will cause out of index
+            var twoTilesAway = GetTile();
+            if (PathStep + 1 < path.Count)
+            {
+                twoTilesAway = GetTile(path[PathStep], path[PathStep + 1]);
+            }
+
+
+            if (nextTile is Road)
+            {
+                var nextRoad = (Road)nextTile;
+                //Uses the direction you will be traveling once on the road. Not the direction to join the road
+                int PathStepToUse;
+                if (twoTilesAway is Office || twoTilesAway is Home)
+                {
+                    PathStepToUse = PathStep;
+                }
+                else
+                {
+                    PathStepToUse = PathStep + 1;
+                }
+                if (nextRoad.MergeToRoad(path[PathStepToUse]))
+                {
+                    
+                    if (currentTile is Road)
+                    {
+                        var currentRoad = (Road) currentTile;
+                        currentRoad.LeaveRoad(path[PathStep]);
+                    }
+                    Move(path[PathStep]);
+                    PathStep++;
+                }
+                else
+                {
+                    TimeInTraffic++;
+                }
+            }
+            else if (nextTile is Home)
+            {
+                
+                //Leave Current Road
+                if (currentTile is Road)
+                {
+                    var currentRoad = (Road)currentTile;
+
+                    if (PathStep == path.Count - 1)
+                    {
+                        currentRoad.LeaveRoad(path[PathStep - 1]);
+                    }
+                    else
+                    {
+                        currentRoad.LeaveRoad(path[PathStep]);
+                    }
+
+                }
+                Move(path[PathStep]);
+                PathStep++;
+            }
+            else if (nextTile is Office)
+            {
+                
+                //Leave Current Road
+                if (currentTile is Road)
+                {
+                    var currentRoad = (Road)currentTile;
+                    if (PathStep == path.Count - 1)
+                    {
+                        currentRoad.LeaveRoad(path[PathStep - 1]);
+                    }
+                    else
+                    {
+                        currentRoad.LeaveRoad(path[PathStep]);
+                    }
+                }
+
+                Move(path[PathStep]);
+                PathStep++;
+            }
+            else if (nextTile is Intersection)
+            {
+                var roadAfterIntersection = (Road)twoTilesAway;
+                var intersection = (Intersection)nextTile;
+                if (roadAfterIntersection.MergeToRoad(path[PathStep + 1]) && intersection.CanCross(path[PathStep]))
+                {
+                    //Leave Current Road
+                    if (currentTile is Road)
+                    {
+                        var currentRoad = (Road)currentTile;
+                        currentRoad.LeaveRoad(path[PathStep]);
+                    }
+                    
+                    //Move to intersection
+
+                    Move(path[PathStep]);
+                    PathStep++;
+                    //Move onto  road
+
+                    Move(path[PathStep]);
+                    PathStep++;
+                }
+                else
+                {
+                    TimeInTraffic++;
+                }
+            }
+            //Allow City to decide if this person should continue to be updated
+            FinishedTraveling = PathStep > path.Count - 1;
+        }
     }
+
+
+
 }

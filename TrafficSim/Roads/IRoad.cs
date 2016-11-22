@@ -6,8 +6,8 @@
         int NumberOfLanes{get; set; }
         int TimeToTraverse {get; set;}
         double Cost { get; set; }
-        ushort DirectionAOccupancy { get; set; }
-        ushort DirectionBOccupancy { get; set; }
+        int DirectionAOccupancy { get; set; }
+        int DirectionBOccupancy { get; set; }
 
     }
 }

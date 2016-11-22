@@ -49,6 +49,7 @@
   <ItemGroup>
     <Compile Include="City.cs" />
     <Compile Include="ITile.cs" />
+    <Compile Include="MutationHandling\Mutation.cs" />
     <Compile Include="MutationHandling\TrafficMutator.cs" />
     <Compile Include="PersonNavigation\Direction.cs" />
     <Compile Include="PersonNavigation\PathPossiblity.cs" />
