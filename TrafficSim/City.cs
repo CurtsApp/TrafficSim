@@ -66,48 +66,35 @@ namespace TrafficSim
             }
             
             PrintCity();
-            while (true)
+            //The larger the number the more accurate the final prediction
+            while (mManager.GetNumberOfCyclesSinceLastKeptChange() < 5000)
              {
                  Tick();
              }
+
+             Console.Out.WriteLine("The ideal intersection timing for this city is... [Measured in ticks]");
+            PrintFinalOutput();
+
              
         }
 
         private void Tick()
         {
-            //Console.Clear();
-            //PrintPeople();
-            //PrintRoadOccupancy();
             TicksSinceStartUp++;
             allFinishedTraveling = true;
-            int numNotArrived = 0;
+
             
             foreach (var person in _people)
             {
                 if (!person.IsFinishedTraveling())
                 {
-                    //Console.Clear();
-                    //PrintPeople();
-                    //PrintRoadOccupancy();
                     person.Update2();
-                    
                     allFinishedTraveling = false;
-                    numNotArrived++;
 
                 }
                 
             }
-            //Console.Clear();
-            //Console.Out.WriteLine(numNotArrived);
-            /*for (int i = 0; i < _people.Count; i++)
-            {
-                if (!_people[i].IsFinishedTraveling())
-                {
-                    Console.Write(i + ",");
-
-                }
-            }
-            Console.WriteLine();*/
+            
             if (allFinishedTraveling)
             {
                 //if(Headed Home)
@@ -129,21 +116,23 @@ namespace TrafficSim
                         if (totalTimeInTraffic > mManager.GetLastTimeInTraffic())
                         {
                             //Revert last mutation
-                            Mutation previousChange = mManager.GetLastMutation();
-                            previousChange.ChangeAmount = previousChange.ChangeAmount*-1;
-
-                            ApplyMutation(previousChange);
+                           ApplyMutation(mManager.GetRevertLastChange());
+                            Console.WriteLine("Reverting last mutation, time in traffic was: " + totalTimeInTraffic);
                         }
                         else
                         {
                             mManager.UpdateLastTimeInTraffic(totalTimeInTraffic);
+                            Console.WriteLine("Kept change, new time in traffic is: " + totalTimeInTraffic);
+                            
                         }
 
                         //Make next Mutation
                         ApplyMutation(mManager.GetNextMutation());
+                        
                     }
                     
                 }
+                //If person is headed to work they are now headed home and vise versa
                 foreach (var person in _people)
                 {
                    person.ReverseDirection();
@@ -151,10 +140,7 @@ namespace TrafficSim
 
             }
 
-            if (TicksSinceStartUp == 120)
-            {
-
-            }
+            //Update all traffic lights
             foreach (var intersection in _intersections)
             {
                 
@@ -399,6 +385,52 @@ namespace TrafficSim
             return zones;
         }
 
+        private void PrintFinalOutput()
+        {
+            for (var y = 0; y < _cityHeight; y++)
+            {
+                for (var x = 0; x < _cityWidth; x++)
+                {
+
+                    if (LiveMap[x, y] is TwoLaneRoad)
+                    {
+                        Console.Write("   ");
+                    }
+                    else if (LiveMap[x, y] is Home)
+                    {
+                        Console.Write("H  ");
+                    }
+                    else if (LiveMap[x, y] is Office)
+                    {
+                        Console.Write("O  ");
+                    }
+                    else if (LiveMap[x, y] is Intersection)
+                    {
+                        Intersection intersection = (Intersection) LiveMap[x, y];
+                        if (intersection.GetCycleTime() > 99)
+                        {
+                            Console.Write(intersection.GetCycleTime());
+                        }
+                        else if (intersection.GetCycleTime() > 9)
+                        {
+                            Console.Write(intersection.GetCycleTime() + " ");
+                        }
+                        else
+                        {
+                            Console.Write(intersection.GetCycleTime() + "  ");
+                        }
+                    }
+                    else if (LiveMap[x, y] is Vacant)
+                    {
+                        Console.Write("   ");
+                    }
+
+
+                }
+                    Console.WriteLine();
+                }
+            
+        }
         private void LoadPeopleFromFile()
         {
            

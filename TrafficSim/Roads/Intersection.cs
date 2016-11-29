@@ -28,7 +28,13 @@ namespace TrafficSim.Roads
 
         public void ChangeCycleTime(int cycleTime)
         {
+            //If cycle time becomes a negative number it will wrap around to the max extreme of ulong
             TimeToSwitch = TimeToSwitch + (ulong)cycleTime;
+        }
+
+        public ulong GetCycleTime()
+        {
+            return TimeToSwitch;
         }
         public bool CanCross(Direction travelingDirection)
         {
