@@ -11,17 +11,18 @@ namespace TrafficSim.MutationHandling
     {
         private Mutation lastChange;
         private ulong lastTimeInTraffic;
-        private List<Intersection> allIntersections;
         private Random rand = new Random();
-        public TrafficMutator(List<Intersection> intersections)
+        public TrafficMutator()
         {
-            allIntersections = intersections;
+            
         }
 
         public Mutation GetNextMutation()
         {
-            Intersection intersection = allIntersections[rand.Next(0, allIntersections.Count)];
-            return new Mutation(intersection.Location, rand.Next(-10,11));
+            Intersection intersection = City._intersections[rand.Next(0, City._intersections.Count)];
+            Mutation change = new Mutation(intersection, rand.Next(-10, 11));
+            lastChange = change;
+            return change;
         }
 
         public ulong GetLastTimeInTraffic()

@@ -29,6 +29,7 @@ namespace TrafficSim
         private string storagePathMap;
         private bool allFinishedTraveling = false;
         private TrafficMutator mManager;
+        private bool firstRun = true;
         
         
 
@@ -37,7 +38,7 @@ namespace TrafficSim
             storagePathPeople = startValues.StoragePath;
             storagePathMap = startValues.StoragePathMap;
 
-            mManager = new TrafficMutator(_intersections);
+            mManager = new TrafficMutator();
             _budget = startValues.Budget;
              _traffictCycleTime = startValues.TrafficLightCycleTimeDefault;
             _cityHeight = startValues.MapHeight;
@@ -74,9 +75,9 @@ namespace TrafficSim
 
         private void Tick()
         {
-            Console.Clear();
+            //Console.Clear();
             //PrintPeople();
-            PrintRoadOccupancy();
+            //PrintRoadOccupancy();
             TicksSinceStartUp++;
             allFinishedTraveling = true;
             int numNotArrived = 0;
@@ -85,9 +86,9 @@ namespace TrafficSim
             {
                 if (!person.IsFinishedTraveling())
                 {
-                    Console.Clear();
+                    //Console.Clear();
                     //PrintPeople();
-                    PrintRoadOccupancy();
+                    //PrintRoadOccupancy();
                     person.Update2();
                     
                     allFinishedTraveling = false;
@@ -97,7 +98,7 @@ namespace TrafficSim
                 
             }
             //Console.Clear();
-            Console.Out.WriteLine(numNotArrived);
+            //Console.Out.WriteLine(numNotArrived);
             /*for (int i = 0; i < _people.Count; i++)
             {
                 if (!_people[i].IsFinishedTraveling())
@@ -109,27 +110,38 @@ namespace TrafficSim
             Console.WriteLine();*/
             if (allFinishedTraveling)
             {
-
-                if (_people[0].IsHeadedToWork())
+                //if(Headed Home)
+                if (!_people[0].IsHeadedToWork())
                 {
                     ulong totalTimeInTraffic = 0;
                     foreach (var person in _people)
                     {
                         totalTimeInTraffic = totalTimeInTraffic + person.GetTimeInTraffic();
+                        person.ResetTimeInTraffic();
                     }
-
-                    if (totalTimeInTraffic > mManager.GetLastTimeInTraffic())
+                    if (firstRun)
                     {
-                        //Revert last mutation
-                        Mutation previousChange = mManager.GetLastMutation();
-                        previousChange.ChangeAmount = previousChange.ChangeAmount*-1;
-
-                        ApplyMutation(previousChange);
+                        mManager.UpdateLastTimeInTraffic(totalTimeInTraffic);
+                        firstRun = false;
                     }
-                    
-                    //Make next Mutation
-                    ApplyMutation(mManager.GetNextMutation());
-                   
+                    else
+                    {
+                        if (totalTimeInTraffic > mManager.GetLastTimeInTraffic())
+                        {
+                            //Revert last mutation
+                            Mutation previousChange = mManager.GetLastMutation();
+                            previousChange.ChangeAmount = previousChange.ChangeAmount*-1;
+
+                            ApplyMutation(previousChange);
+                        }
+                        else
+                        {
+                            mManager.UpdateLastTimeInTraffic(totalTimeInTraffic);
+                        }
+
+                        //Make next Mutation
+                        ApplyMutation(mManager.GetNextMutation());
+                    }
                     
                 }
                 foreach (var person in _people)
@@ -154,9 +166,7 @@ namespace TrafficSim
         private void ApplyMutation(Mutation mutation)
         {
            
-            Intersection intersection =
-                (Intersection)LiveMap[mutation.Location.X, mutation.Location.Y];
-            intersection.ChangeCycleTime(mutation.ChangeAmount);
+            mutation.Intersection.ChangeCycleTime(mutation.ChangeAmount);
         }
         private void PrintRoadOccupancy()
         {
@@ -168,13 +178,13 @@ namespace TrafficSim
                     if (live != null)
                     {
                         Road road = live;
-                        if (road.DirectionAOccupancy > 9 || road.DirectionAOccupancy < 0)
+                        if (road.DirectionBOccupancy > 9 || road.DirectionBOccupancy < 0)
                         {
-                            Console.Write(road.DirectionAOccupancy + " ");
+                            Console.Write(road.DirectionBOccupancy + " ");
                         }
                         else
                         {
-                            Console.Write(road.DirectionAOccupancy + "  ");
+                            Console.Write(road.DirectionBOccupancy + "  ");
                         }
                     }
                     else

@@ -4,15 +4,15 @@ namespace TrafficSim.Roads
 {
     public class Intersection : ITile
     {
-        private ulong _timeToSwitch;
-        private bool _verticleGreen;
+        public ulong TimeToSwitch;
+        public bool VerticleGreen;
 
 
         public Intersection(ulong timeToSwtich, bool startVerticleTraffic)
         {
             ClassName = "Intersection";
-            _timeToSwitch = timeToSwtich;
-            _verticleGreen = startVerticleTraffic;
+            TimeToSwitch = timeToSwtich;
+            VerticleGreen = startVerticleTraffic;
         }
 
         public Point Location { get; set; }
@@ -20,21 +20,21 @@ namespace TrafficSim.Roads
 
         public void Update(ulong currentTick)
         {
-            if (currentTick %_timeToSwitch == 0)
+            if (currentTick %TimeToSwitch == 0)
             {
-                _verticleGreen = !_verticleGreen;
+                VerticleGreen = !VerticleGreen;
             }
         }
 
         public void ChangeCycleTime(int cycleTime)
         {
-            _timeToSwitch = _timeToSwitch + (ulong)cycleTime;
+            TimeToSwitch = TimeToSwitch + (ulong)cycleTime;
         }
         public bool CanCross(Direction travelingDirection)
         {
             
             //When verticle is Green allow N/S travel
-            if (_verticleGreen)
+            if (VerticleGreen)
             {
                 if (travelingDirection == Direction.North || travelingDirection == Direction.South)
                 {

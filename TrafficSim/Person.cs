@@ -377,6 +377,10 @@ namespace TrafficSim
             return TimeInTraffic;
         }
 
+        public void ResetTimeInTraffic()
+        {
+            TimeInTraffic = 0;
+        }
         //Indicate to the person to head back the opposite direction along their path
         public void ReverseDirection()
         {
