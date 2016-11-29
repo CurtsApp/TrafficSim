@@ -4,7 +4,7 @@ namespace TrafficSim.Roads
 {
     public class Intersection : ITile
     {
-        private readonly ulong _timeToSwitch;
+        private ulong _timeToSwitch;
         private bool _verticleGreen;
 
 
@@ -15,28 +15,47 @@ namespace TrafficSim.Roads
             _verticleGreen = startVerticleTraffic;
         }
 
-        public static ulong CurrentTick { get; set; }
         public Point Location { get; set; }
         public string ClassName { get; set; }
 
         public void Update(ulong currentTick)
         {
-            if (_timeToSwitch%currentTick == 0)
+            if (currentTick %_timeToSwitch == 0)
             {
                 _verticleGreen = !_verticleGreen;
             }
         }
 
+        public void ChangeCycleTime(int cycleTime)
+        {
+            _timeToSwitch = _timeToSwitch + (ulong)cycleTime;
+        }
         public bool CanCross(Direction travelingDirection)
         {
-            return true;
+            
             //When verticle is Green allow N/S travel
             if (_verticleGreen)
             {
-                return travelingDirection == Direction.North || travelingDirection == Direction.South;
+                if (travelingDirection == Direction.North || travelingDirection == Direction.South)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+                //return (travelingDirection == Direction.North || travelingDirection == Direction.South);
             }
             //When horizontal is Green allow E/W travel
-            return travelingDirection == Direction.East || travelingDirection == Direction.West;
+            if (travelingDirection == Direction.East || travelingDirection == Direction.West)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+            //return (travelingDirection == Direction.East || travelingDirection == Direction.West);
         }
     }
 }

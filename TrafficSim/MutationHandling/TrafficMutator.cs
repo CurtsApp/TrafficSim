@@ -10,20 +10,33 @@ namespace TrafficSim.MutationHandling
     class TrafficMutator
     {
         private Mutation lastChange;
-        private int lastTimeInTraffic;
+        private ulong lastTimeInTraffic;
         private List<Intersection> allIntersections;
+        private Random rand = new Random();
         public TrafficMutator(List<Intersection> intersections)
         {
             allIntersections = intersections;
         }
 
-        public Mutation getNextMutation(int timeInTraffic)
+        public Mutation GetNextMutation()
         {
-            if (timeInTraffic > lastTimeInTraffic)
-            {
-                
-            }
-            return  new Mutation(new Point(1,1), 1 );
+            Intersection intersection = allIntersections[rand.Next(0, allIntersections.Count)];
+            return new Mutation(intersection.Location, rand.Next(-10,11));
+        }
+
+        public ulong GetLastTimeInTraffic()
+        {
+            return lastTimeInTraffic;
+        }
+
+        public void UpdateLastTimeInTraffic(ulong timeInTraffic)
+        {
+            lastTimeInTraffic = timeInTraffic;
+        }
+
+        public Mutation GetLastMutation()
+        {
+            return lastChange;
         }
     }
 }

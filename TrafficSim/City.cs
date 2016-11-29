@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
+using TrafficSim.MutationHandling;
 using TrafficSim.Roads;
 
 
@@ -18,15 +19,16 @@ namespace TrafficSim
         private readonly ulong _traffictCycleTime;
         private readonly Random _rand = new Random();
         public static ITile [,] LiveMap;
-        private List<Home> _homes = new List<Home>();
+        public static List<Home> _homes = new List<Home>();
         private List<Person> _people = new List<Person>();
-        private List<Office> _offices = new List<Office>();
-        private List<Intersection> _intersections = new List<Intersection>();
+        public static List<Office> _offices = new List<Office>();
+        public static List<Intersection> _intersections = new List<Intersection>();
         public ulong TicksSinceStartUp { get; set; }
         public int [,] TravelTimes { get; set; }
         private string storagePathPeople;
         private string storagePathMap;
         private bool allFinishedTraveling = false;
+        private TrafficMutator mManager;
         
         
 
@@ -35,29 +37,33 @@ namespace TrafficSim
             storagePathPeople = startValues.StoragePath;
             storagePathMap = startValues.StoragePathMap;
 
+            mManager = new TrafficMutator(_intersections);
             _budget = startValues.Budget;
              _traffictCycleTime = startValues.TrafficLightCycleTimeDefault;
             _cityHeight = startValues.MapHeight;
             _cityWidth = startValues.MapWidth;
             _population = startValues.Population;
             _zoning = new ZoneMap(_cityWidth,_cityHeight);
-            _zoning = GenerateZones(_zoning);
+           
             LiveMap = new ITile[_cityWidth, _cityHeight];
-            LiveMap = GenerateLiveMap(LiveMap);
+            
             TravelTimes = new int[_cityWidth, _cityHeight];
-            GenerateTravelTimeHelper();
+            
             
             if (File.Exists(storagePathPeople))
             {
                 //GeneratePeople();
                 LoadPeopleFromFile();
-                //TODO ReEnable Saving after debugging
+                
             }
             else
             {
+                _zoning = GenerateZones(_zoning);
+                LiveMap = GenerateLiveMap(LiveMap);
+                GenerateTravelTimeHelper();
                 GeneratePeople();
             }
-
+            
             PrintCity();
             while (true)
              {
@@ -73,8 +79,7 @@ namespace TrafficSim
             PrintRoadOccupancy();
             TicksSinceStartUp++;
             allFinishedTraveling = true;
-
-            
+            int numNotArrived = 0;
             
             foreach (var person in _people)
             {
@@ -86,10 +91,13 @@ namespace TrafficSim
                     person.Update2();
                     
                     allFinishedTraveling = false;
-                    
+                    numNotArrived++;
+
                 }
                 
             }
+            //Console.Clear();
+            Console.Out.WriteLine(numNotArrived);
             /*for (int i = 0; i < _people.Count; i++)
             {
                 if (!_people[i].IsFinishedTraveling())
@@ -101,28 +109,62 @@ namespace TrafficSim
             Console.WriteLine();*/
             if (allFinishedTraveling)
             {
-                
+
+                if (_people[0].IsHeadedToWork())
+                {
+                    ulong totalTimeInTraffic = 0;
+                    foreach (var person in _people)
+                    {
+                        totalTimeInTraffic = totalTimeInTraffic + person.GetTimeInTraffic();
+                    }
+
+                    if (totalTimeInTraffic > mManager.GetLastTimeInTraffic())
+                    {
+                        //Revert last mutation
+                        Mutation previousChange = mManager.GetLastMutation();
+                        previousChange.ChangeAmount = previousChange.ChangeAmount*-1;
+
+                        ApplyMutation(previousChange);
+                    }
+                    
+                    //Make next Mutation
+                    ApplyMutation(mManager.GetNextMutation());
+                   
+                    
+                }
                 foreach (var person in _people)
                 {
                    person.ReverseDirection();
                 }
+
             }
-           
-           
+
+            if (TicksSinceStartUp == 120)
+            {
+
+            }
             foreach (var intersection in _intersections)
             {
+                
                 intersection.Update(TicksSinceStartUp);
             }
 
         }
 
+        private void ApplyMutation(Mutation mutation)
+        {
+           
+            Intersection intersection =
+                (Intersection)LiveMap[mutation.Location.X, mutation.Location.Y];
+            intersection.ChangeCycleTime(mutation.ChangeAmount);
+        }
         private void PrintRoadOccupancy()
         {
             for (int i = 0; i < _cityHeight; i++)
             {
                 for (int j = 0; j < _cityWidth; j++)
                 {
-                    var live = Person.Map[j, i] as Road;
+                    var live = LiveMap[j, i] as Road;
                     if (live != null)
                     {
                         Road road = live;
@@ -349,19 +391,43 @@ namespace TrafficSim
 
         private void LoadPeopleFromFile()
         {
-            _people = JsonConvert.DeserializeObject<List<Person>>(File.ReadAllText(storagePathPeople));
+           
             JsonConverter[] converters = {new TileConverter()};
-            Person.Map = JsonConvert.DeserializeObject<ITile[,]>(File.ReadAllText(storagePathMap),
+            LiveMap = JsonConvert.DeserializeObject<ITile[,]>(File.ReadAllText(storagePathMap),
                 new JsonSerializerSettings() {Converters = converters});
-            
-            
+            for (int x = 0; x < _cityWidth; x++)
+            {
+                for (int y = 0; y < _cityHeight; y++)
+                {
+                    if (LiveMap[x, y] is Home)
+                    {
+                         Home buffer = (Home)LiveMap[x, y];
+                         _homes.Add(buffer);
+                         LiveMap[x, y] = buffer;
+                    } else if (LiveMap[x, y] is Office)
+                    {
+                        Office buffer = (Office)LiveMap[x, y];
+                        _offices.Add(buffer);
+                        LiveMap[x, y] = buffer;
+                    }
+                    else if (LiveMap[x, y] is Intersection)
+                    {
+                        Intersection buffer = (Intersection)LiveMap[x, y];
+                        _intersections.Add(buffer);
+                        LiveMap[x, y] = buffer;
+                    }
+                }
+            }
+
+            _people = JsonConvert.DeserializeObject<List<Person>>(File.ReadAllText(storagePathPeople));
+
         }
 
         
         private void WritePeopleToFile()
         {
             File.WriteAllText(@storagePathPeople, JsonConvert.SerializeObject(_people));
-            File.WriteAllText(@storagePathMap, JsonConvert.SerializeObject(Person.Map));
+            File.WriteAllText(@storagePathMap, JsonConvert.SerializeObject(LiveMap));
         }
         private void GeneratePeople()
         {
@@ -369,7 +435,7 @@ namespace TrafficSim
             {
                
                 var personBuffer = new Person(_homes[_rand.Next(_homes.Count)], _offices[_rand.Next(_offices.Count)],
-                    LiveMap, TravelTimes);
+                   TravelTimes);
                 _people.Add(personBuffer);
                 Console.Clear();
                 var percentComplete = i / (double)_population;

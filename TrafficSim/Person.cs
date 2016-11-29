@@ -18,14 +18,13 @@ namespace TrafficSim
         private ulong TimeInTraffic;
 
 
-        public Person(Home home, Office work, ITile[,] map, int[,] pathingHelper)
+        public Person(Home home, Office work, int[,] pathingHelper)
         {
             PersonTracker++;
             Home = home;
             Work = work;
             CurrentLocation = Home.Location;
             PathingHelper = pathingHelper;
-            Map = map;
 
             TimeInTraffic = 0;
 
@@ -52,7 +51,6 @@ namespace TrafficSim
             PathToHome = pathToHome;
         }
 
-        public static ITile[,] Map { get; set; }
 
         public Home Home { get; set; }
         public Office Work { get; set; }
@@ -391,6 +389,10 @@ namespace TrafficSim
             return FinishedTraveling;
         }
 
+        public bool IsHeadedToWork()
+        {
+            return HeadedToWork;
+        }
         //Moves the CurrentLocation varibale relative to the passed in direction
         private void Move(Direction directon)
         {
@@ -489,7 +491,7 @@ namespace TrafficSim
         //If no parameters are given GetTile(); will return currentLocation Tile
         private ITile GetTile(int xOffset = 0, int yOffset = 0)
         {
-            return Map[CurrentLocation.GetX() + xOffset, CurrentLocation.GetY() + yOffset];
+            return City.LiveMap[CurrentLocation.GetX() + xOffset, CurrentLocation.GetY() + yOffset];
         }
 
         
@@ -640,7 +642,8 @@ namespace TrafficSim
             {
                 var roadAfterIntersection = (Road)twoTilesAway;
                 var intersection = (Intersection)nextTile;
-                if (roadAfterIntersection.MergeToRoad(path[PathStep + 1]) && intersection.CanCross(path[PathStep]))
+                //Important that intersection check is first so that Road Occupancy does not become messed up
+                if (intersection.CanCross(path[PathStep]) && roadAfterIntersection.MergeToRoad(path[PathStep + 1]))
                 {
                     //Leave Current Road
                     if (currentTile is Road)
