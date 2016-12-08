@@ -19,7 +19,7 @@ namespace TrafficSim.MutationHandling
         public Mutation GetNextMutation()
         {
             Intersection intersection = City._intersections[rand.Next(0, City._intersections.Count)];
-            Mutation change = new Mutation(intersection, rand.Next(-10, 11));
+            Mutation change = new Mutation(intersection, rand.Next(-100, 101));
             lastChange = change;
             toatlChangesKept++;
             totalChangesMade++;

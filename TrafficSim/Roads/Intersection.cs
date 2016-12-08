@@ -1,14 +1,16 @@
-﻿using TrafficSim.PersonNavigation;
+﻿using System;
+using TrafficSim.PersonNavigation;
 
 namespace TrafficSim.Roads
 {
     public class Intersection : ITile
     {
-        public ulong TimeToSwitch;
+        public int TimeToSwitch;
         public bool VerticleGreen;
+        Random rand = new Random();
 
 
-        public Intersection(ulong timeToSwtich, bool startVerticleTraffic)
+        public Intersection(int timeToSwtich, bool startVerticleTraffic)
         {
             ClassName = "Intersection";
             TimeToSwitch = timeToSwtich;
@@ -18,7 +20,7 @@ namespace TrafficSim.Roads
         public Point Location { get; set; }
         public string ClassName { get; set; }
 
-        public void Update(ulong currentTick)
+        public void Update(int currentTick)
         {
             if (currentTick %TimeToSwitch == 0)
             {
@@ -29,10 +31,15 @@ namespace TrafficSim.Roads
         public void ChangeCycleTime(int cycleTime)
         {
             //If cycle time becomes a negative number it will wrap around to the max extreme of ulong
-            TimeToSwitch = TimeToSwitch + (ulong)cycleTime;
+            TimeToSwitch = TimeToSwitch + cycleTime;
+            //Prevents Extreme Values
+            if (TimeToSwitch < 1 || TimeToSwitch > 200)
+            {
+                TimeToSwitch = 100 + rand.Next(-20,20);
+            } 
         }
 
-        public ulong GetCycleTime()
+        public int GetCycleTime()
         {
             return TimeToSwitch;
         }

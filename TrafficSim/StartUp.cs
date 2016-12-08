@@ -12,7 +12,7 @@ namespace TrafficSim
                 Budget = 1000000,//1Million
                 MapHeight = 25,
                 MapWidth = 25,
-                Population = 20,
+                Population = 1000,
                 TrafficLightCycleTimeDefault = 120//Measured in ticks, 60mph = 60ticks
 
                

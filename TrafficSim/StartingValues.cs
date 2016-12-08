@@ -7,7 +7,7 @@ namespace TrafficSim
         public byte MapHeight;
         public ulong Budget;
         public ulong Population;
-        public ulong TrafficLightCycleTimeDefault;
+        public int TrafficLightCycleTimeDefault;
         public string StoragePath;
         public string StoragePathMap;
     }

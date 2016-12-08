@@ -16,20 +16,21 @@ namespace TrafficSim
         private readonly int _cityHeight;
         private readonly int _cityWidth;
         private readonly ulong _population;
-        private readonly ulong _traffictCycleTime;
+        private readonly int _traffictCycleTime;
         private readonly Random _rand = new Random();
         public static ITile [,] LiveMap;
         public static List<Home> _homes = new List<Home>();
         private List<Person> _people = new List<Person>();
         public static List<Office> _offices = new List<Office>();
         public static List<Intersection> _intersections = new List<Intersection>();
-        public ulong TicksSinceStartUp { get; set; }
+        public int TicksSinceStartUp { get; set; }
         public int [,] TravelTimes { get; set; }
         private string storagePathPeople;
         private string storagePathMap;
         private bool allFinishedTraveling = false;
         private TrafficMutator mManager;
         private bool firstRun = true;
+        private Random rand = new Random();
         
         
 
@@ -67,7 +68,7 @@ namespace TrafficSim
             
             PrintCity();
             //The larger the number the more accurate the final prediction
-            while (mManager.GetNumberOfCyclesSinceLastKeptChange() < 5000)
+            while (mManager.GetNumberOfCyclesSinceLastKeptChange() < 200000)
              {
                  Tick();
              }
@@ -83,7 +84,8 @@ namespace TrafficSim
             TicksSinceStartUp++;
             allFinishedTraveling = true;
 
-            
+            //Console.Clear();
+            //PrintRoadOccupancy();
             foreach (var person in _people)
             {
                 if (!person.IsFinishedTraveling())
@@ -97,6 +99,8 @@ namespace TrafficSim
             
             if (allFinishedTraveling)
             {
+                
+                
                 //if(Headed Home)
                 if (!_people[0].IsHeadedToWork())
                 {
@@ -156,6 +160,34 @@ namespace TrafficSim
         }
         private void PrintRoadOccupancy()
         {
+            for (int i = 0; i < _cityHeight; i++)
+            {
+                for (int j = 0; j < _cityWidth; j++)
+                {
+                    var live = LiveMap[j, i] as Road;
+                    if (live != null)
+                    {
+                        Road road = live;
+                        if (road.DirectionAOccupancy > 9 || road.DirectionAOccupancy < 0)
+                        {
+                            Console.Write(road.DirectionAOccupancy + " ");
+                        }
+                        else
+                        {
+                            Console.Write(road.DirectionAOccupancy + "  ");
+                        }
+                    }
+                    else
+                    {
+                        Console.Write("   ");
+                    }
+                }
+                Console.WriteLine();
+            }
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine();
+            Console.WriteLine();
             for (int i = 0; i < _cityHeight; i++)
             {
                 for (int j = 0; j < _cityWidth; j++)
@@ -299,7 +331,7 @@ namespace TrafficSim
                             break;
                             //Intersection
                         case 3:
-                            Intersection bufferIntersection = new Intersection(_traffictCycleTime, true);
+                            Intersection bufferIntersection = new Intersection(_traffictCycleTime + rand.Next(-30,30), true);
                             _intersections.Add(bufferIntersection);
                             LiveMap[x, y] = bufferIntersection;
                             break;
